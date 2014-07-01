@@ -28,7 +28,7 @@ class ChessBot
     Photodiode frontRightPhotoDiode;
     Photodiode frontLeftPhotoDiode;
 		
-    String squareState;
+    int squareState;
     double angleState;
 			
 };

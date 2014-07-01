@@ -29,110 +29,87 @@ void ChessBot::Setup()
 void ChessBot::CrossSquares(int numOfSquares){
     
     PIDController PID = PIDController(10, 6.0, 0.05, 70, 70, -70);
-    PIDController velocityIntegrator = PIDController(10, 0, -2, 0, 0, -80);
     byte lookForCrossingSwitch = 0;
-    String startingSquare;
+    int startingSquare;
     int numOfCrossings = 0;
     int crossingSpeed = 150;
     float adjustAngle;
+    bool isHalfway = false;
     
     UpdateSquareState();
-    if((squareState == "f") || (squareState == "0"))
+    if((squareState == 0xF) || (squareState == 0x0))
     {
         startingSquare = squareState;
         gyro.Reinitialize();
         
         if(abs(angleState) == 45 || abs(angleState) == 135 || abs(angleState) == 225 || abs(angleState) == 315)
         {
+            
             while(numOfCrossings < numOfSquares)
             {
                 UpdateSquareState();
-                switch (lookForCrossingSwitch)
+                switch (squareState) 
                 {
-                    case 0:
-                        if((squareState == "e") || (squareState == "1"))
-                        {
-                            adjustAngle += 1.5f;
-                            break;
-                        }
-                        if((squareState == "d") || (squareState == "2"))
-                        {
-                            adjustAngle += -1.5f;
-                            break;
-                        }
-                        
-                        if((squareState == "c") || (squareState == "3"))
-                            lookForCrossingSwitch = 1;
+                    case 0xE:
+                    case 0x1:
+                    case 0x7:
+                    case 0x8:
+                        adjustAngle += 1.5f;
                         break;
-                    case 1:
-                        if((squareState == "b") || (squareState == "4"))
-                        {
-                            adjustAngle += -1.5f;
-                            break;
-                        }
-                        if((squareState == "7") || (squareState == "8"))
-                        {
-                            adjustAngle += 1.5f;
-                            break;
-                        }
-                        if(startingSquare == squareState)
+                        
+                    case 0xD:
+                    case 0x2:
+                    case 0xb:
+                    case 0x4:
+                        adjustAngle += -1.5;
+                        break;
+                        
+                    case 0xC:
+                    case 0x3:
+                        isHalfway = true;
+                        break;
+                        
+                    default:
+                        if((squareState == startingSquare) && (isHalfway))
                         {
                             numOfCrossings++;
-                            lookForCrossingSwitch = 0;
+                            isHalfway = false;
                         }
-                        break; 
+                        break;
                 }
-                
                 gyro.UpdateAngles();
                 leftWheel.Rotate(crossingSpeed - PID.ComputeOutput(gyro.anglesXYZ[2], adjustAngle));
                 rightWheel.Rotate(crossingSpeed + PID.ComputeOutput(gyro.anglesXYZ[2], adjustAngle));
                 delay(10);
-                
             }
         }
         else
         {
             while(numOfCrossings < numOfSquares)
             {
-                
                 UpdateSquareState();
-                switch (lookForCrossingSwitch)
+                switch (squareState) 
                 {
-                    case 0:
-                        if((squareState == "e") || (squareState == "1"))
-                        {
-                            adjustAngle += -1.5f;
-                            break;
-                        }
-                        if((squareState == "d") || (squareState == "2"))
-                        {
-                            adjustAngle += 1.5f;
-                            break;
-                        }
-                        
-                        if((squareState == "c") || (squareState == "3"))
-                            lookForCrossingSwitch = 1;
+                    case 0xD:
+                    case 0x2:
+                    case 0x7:
+                    case 0x8:
+                        adjustAngle += 1.5f;
                         break;
-                    case 1:
-                        if((squareState == "b") || (squareState == "4"))
-                        {
-                            adjustAngle += -1.5f;
-                            break;
-                        }
-                        if((squareState == "7") || (squareState == "8"))
-                        {
-                            adjustAngle += 1.5f;
-                            break;
-                        }
-                        if((startingSquare == "f" && squareState == "0") || (startingSquare == "0" && squareState == "f"))
-                        {
+                            
+                    case 0xE:
+                    case 0x1:
+                    case 0xB:
+                    case 0x4:
+                        adjustAngle += -1.5;
+                        break;
+                            
+                    default:
+                        if((startingSquare == 0x0 && squareState == 0xF) || (startingSquare == 0xF && squareState == 0x0))
                             numOfCrossings++;
-                            lookForCrossingSwitch = 0;
-                            startingSquare = squareState;
-                        }
+                        startingSquare = squareState;
                         break;
                 }
-                
                 gyro.UpdateAngles();
                 leftWheel.Rotate(crossingSpeed - PID.ComputeOutput(gyro.anglesXYZ[2], adjustAngle));
                 rightWheel.Rotate(crossingSpeed + PID.ComputeOutput(gyro.anglesXYZ[2], adjustAngle));
@@ -151,6 +128,7 @@ void ChessBot::CrossSquares(int numOfSquares){
         gyro.UpdateAngles();
         leftWheel.Rotate(crossingSpeed - PID.ComputeOutput(gyro.anglesXYZ[2], adjustAngle));
         rightWheel.Rotate(crossingSpeed + PID.ComputeOutput(gyro.anglesXYZ[2], adjustAngle));
+        delay(10);
     }
     
     leftWheel.HardStop();
@@ -202,14 +180,14 @@ void ChessBot::Rotate(double endAngle)
 void ChessBot::Center()
 {
 	UpdateSquareState();
-	if (squareState == "0")
+	if (squareState == 0x0)
 	{
 		Rotate(90);
         AlignToWhiteEdge();
 		Rotate(-90);
         AlignToWhiteEdge();
 	}
-	else if (squareState == "f")
+	else if (squareState == 0xf)
 	{
 		Rotate(90);
         AlignToBlackEdge();
@@ -225,7 +203,7 @@ void ChessBot::UpdateSquareState()
 	int BL = backLeftPhotoDiode.GetDigitalLightMeasurement(800)*4;
 	int FL = frontLeftPhotoDiode.GetDigitalLightMeasurement(800)*2;
 	int FR = frontRightPhotoDiode.GetDigitalLightMeasurement(800);
-	squareState = String( BR + BL + FL + FR, HEX);
+	squareState = (BR + BL + FL + FR);
 }
 
 void ChessBot::AlignToWhiteEdge()
@@ -234,7 +212,7 @@ void ChessBot::AlignToWhiteEdge()
     PIDController PID = PIDController(10, 8.0, 0.05, 70, 70, -70);
     gyro.Reinitialize();
     
-	while(squareState == "0")
+	while(squareState == 0x0)
 	{	
         gyro.UpdateAngles();
 		UpdateSquareState();
@@ -245,16 +223,16 @@ void ChessBot::AlignToWhiteEdge()
 	leftWheel.HardStop();
 	rightWheel.HardStop();
 	
-	while(squareState != "3")
+	while(squareState != 0x3)
 	{	
 		UpdateSquareState();
         
-		if(squareState== "2")
+		if(squareState== 0x2)
 		{
 			leftWheel.Rotate(0);
 			rightWheel.Rotate(90);
 		}
-		else if(squareState == "1")
+		else if(squareState == 0x1)
 		{
 			leftWheel.Rotate(90);
 			rightWheel.Rotate(0);
@@ -288,7 +266,7 @@ void ChessBot::AlignToBlackEdge()
     PIDController PID = PIDController(10, 8.0, 0.05, 70, 70, -70);
     gyro.Reinitialize();
     
-	while(squareState == "f")
+	while(squareState == 0xF)
 	{	
         gyro.UpdateAngles();
 		UpdateSquareState();
@@ -299,16 +277,16 @@ void ChessBot::AlignToBlackEdge()
 	leftWheel.HardStop();
 	rightWheel.HardStop();
 	
-	while(squareState != "c")
+	while(squareState != 0xC)
 	{	
 		UpdateSquareState();
         
-		if(squareState== "d")
+		if(squareState== 0xD)
 		{
 			leftWheel.Rotate(0);
 			rightWheel.Rotate(90);
 		}
-		else if(squareState == "e")
+		else if(squareState == 0xE)
 		{
 			leftWheel.Rotate(90);
 			rightWheel.Rotate(0);
