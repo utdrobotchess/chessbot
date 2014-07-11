@@ -1,15 +1,11 @@
 #include <Wire.h>
+#include <EEPROM.h>
 #include <ChessBot.h>
 
 ChessBot Bot;
-int sign = -1;
-byte corrCommand = 7;
-
-
 
 void setup()
 {
-  Bot = ChessBot();
   Bot.Setup();
   attachInterrupt(Bot.leftWheel.ReturnEncoderInterruptPinRef(), LeftHandleEncoderPinAInterrupt, RISING);  
   attachInterrupt(Bot.rightWheel.ReturnEncoderInterruptPinRef(), RightHandleEncoderPinAInterrupt, RISING);
@@ -19,10 +15,12 @@ void loop()
 {
   SquareMotionTest(2);
   DiagonalTest(2);
+  
 }
 
 void rotateTest()
 {
+  int sign = 1;
     for (int i = 1; i < 5; i++)
     {
       sign = sign * -1;
@@ -60,6 +58,12 @@ void GyroTest()
 void CheckForNextMove()
 {
   Bot.CheckForNextMove();
+}
+
+void ReadRobotIDTest()
+{
+  Serial.println(Bot.readBotId());
+  delay(500);
 }
 
 void RightHandleEncoderPinAInterrupt()

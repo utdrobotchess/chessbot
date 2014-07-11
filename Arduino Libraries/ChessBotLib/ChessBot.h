@@ -6,6 +6,9 @@
 #include <Photodiode.h>
 #include <PIDController.h>
 #include <Wheel.h>
+#include <EEPROM.h>
+
+#define robotIdEEPROMAddress 1
 
 class ChessBot
 {
@@ -15,6 +18,8 @@ public:
     
     void CheckForNextMove();
     void ExecuteCommands();
+    byte readBotId();
+    void writeBotId(byte Id);
     
     void CrossSquares(int numOfSquares);
     void HardStop();
@@ -37,7 +42,6 @@ private:
     
     byte commandBuffer[10][8];
     double angleState;
-    uint8_t robotID;
     
 };
 

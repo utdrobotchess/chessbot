@@ -22,8 +22,20 @@ void ChessBot::Setup()
 	//turn on the IR LEDs
     pinMode(12, OUTPUT);
     digitalWrite(12, HIGH);
-	
+    
+    Serial.begin(9600);
+    
     gyro.Init();
+}
+
+byte ChessBot::readBotId()
+{
+    return EEPROM.read(robotIdEEPROMAddress);
+}
+
+void ChessBot::writeBotId(byte Id)
+{
+    EEPROM.write(robotIdEEPROMAddress, Id);
 }
 
 void ChessBot::CheckForNextMove()
@@ -34,7 +46,7 @@ void ChessBot::CheckForNextMove()
 	
 	while(!readyToExecute && !bufferOverflow)
 	{
-		if(xBee.CheckForCommand(robotID))
+		if(xBee.CheckForCommand(readBotId()))
 		{
 			if(xBee.inboxMessageBuffer[1] == 0xff)
 				readyToExecute = true;
