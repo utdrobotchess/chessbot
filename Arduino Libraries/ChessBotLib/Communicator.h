@@ -8,32 +8,24 @@ class Communicator
     #define Error1			"Error- Message was not received!"
     #define Ok              "Message was received!"
     
-    #define ID					1
-    #define CHECK_SUM			5
-		
-    #define PACKET_SIZE			3
-		
-		
-    #define ID_LOCATION			0
-    #define COMMAND_LOCATION	1
-    #define CHECKSUM_LOCATION	2
-	public:
+	#define ID_INDEX			0
+	#define COMMAND_INDEX		1
+	#define CHECKSUM_INDEX		7
+	
+	#define MESSAGE_SIZE		8
+	
+    #define CHECK_SUM			117
     
-    Communicator();
-    void GetMessage();
-    void SetMessageType(byte type);
-    void SendMessage(byte message);
-    void ExecuteCommand(byte command);
-
-    byte command;
+	
+	public:
+		Communicator();
+		void GetMessage(byte botId);
+		void SendMessage(byte botId);
 		
-	private:
-    byte id;
-    byte idLocation;
-    byte packetSize;
-    byte checkSum;
-    byte checkSumLocation;
-    byte commandLocation;
+		bool CheckForCommand(byte botId);
+		
+		byte inboxMessageBuffer[8];
+		byte outboxMessageBuffer[8];
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <ChessBot.h>
 
-ChessBot Bot;
+ChessBot Bot = ChessBot();
 int sign = -1;
 byte corrCommand = 7;
 
@@ -9,7 +9,7 @@ byte corrCommand = 7;
 
 void setup()
 {
-  Bot = ChessBot();
+  Serial.begin(9600);
   Bot.Setup();
   attachInterrupt(Bot.rightWheel.encoderInterruptPinRef, RightHandleEncoderPinAInterrupt, RISING); 
   attachInterrupt(Bot.leftWheel.encoderInterruptPinRef, LeftHandleEncoderPinAInterrupt, RISING);  
@@ -17,12 +17,27 @@ void setup()
 
 void loop()
 {
+  //Test 1: See if the robot moves in a three by three square
+    //ThreeByThreeSquareMotionTest();
+  
+  //Test 2: See if the robot moves diagonally the number of squares that is needed.
+    //DiagonalMotionTest();
+  
+  //Test 3:See if Communication is working.
+    Bot.CheckForNextMove();
+    
 }
 
-void rotateTest()
+
+
+
+//Tests Methods: Use these to test and see if they work
+
+
+/*void RotateTest()
 {
   Bot.xBee.GetMessage(); 
-  if (Bot.xBee.command == corrCommand)
+  if (Bot.xBee.data == corrCommand)
   {
     for (int i = 1; i < 5; i++)
     {
@@ -30,10 +45,10 @@ void rotateTest()
       Bot.Rotate(i*90*sign);
     }
     
-    Bot.xBee.command = 0;
+    Bot.xBee.data = 0;
   }
   else;
-}
+}*/
 
 void ThreeByThreeSquareMotionTest()
 {
@@ -45,23 +60,16 @@ void ThreeByThreeSquareMotionTest()
    Bot.Rotate(90);
    Bot.CrossSquares(2);
    Bot.Rotate(90);
-   Bot.Center();
+   Bot.Center(90,-90);
 }
 
-/*void UpdateWheelVelocityTest()
+void DiagonalMotionTest()
 {
-  Bot.leftWheel.Rotate(-150);
-  Bot.leftWheel.UpdateWheelVelocity();
-  Serial.println(Bot.leftWheel.wheelVelocity);
+    Bot.Rotate(45);
+    Bot.CrossSquares(2);
+    Bot.Rotate(-225);
+    Bot.Center(90,-90);
 }
-
-void WheelSpeedTest()
-{
-  Bot.ControlWheelVelocities(6000,-4000);
-  Serial.print(Bot.leftWheel.currentPWM);
-  Serial.print(" ");
-  Serial.println(Bot.leftWheel.wheelVelocity); 
-}*/
 
 void RightHandleEncoderPinAInterrupt()
 {

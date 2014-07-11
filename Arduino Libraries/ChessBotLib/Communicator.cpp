@@ -1,70 +1,91 @@
 #include "Communicator.h"
 
-
 Communicator::Communicator()
 {
-    Serial.begin(9600);
 } 
 
-/*void Communicator :: SetMessageType(byte type)
-{
-	
-	if (type == 'a')
-	{
-		//packetSize = NULL;
-		checkSumLocation = NULL;
-		checkSum = NULL;
-		commandLocation = NULL;
-	}
-}*/
 /*
-		ID					1
-		CHECK_SUM			5
-		
-		PACKET_SIZE			3
-		
-		
-		ID_LOCATION			0
-		COMMAND_LOCATION	1
-		CHECKSUM_LOCATION	2
+	ID_INDEX			0
+	COMMAND_INDEX		1
+	CHECKSUM_INDEX		7
+	
+	PACKET_SIZE			8
+	
+    CHECK_SUM			117
 */
-void Communicator::GetMessage()
-{		
-	id = ID; idLocation = ID_LOCATION;		packetSize = PACKET_SIZE; 	
-	checkSumLocation = CHECKSUM_LOCATION;	commandLocation = COMMAND_LOCATION;
-	checkSum = CHECK_SUM;
+void Communicator::GetMessage(byte botId)
+{				 		 				 
+	int messageIndex = 0;
+	byte message[MESSAGE_SIZE] = {0};
+	memset(inboxMessageBuffer, 0, sizeof inboxMessageBuffer);
 	
-	int packetElement = 0;
-	
-	
-	byte packet[packetSize];
-	memset(packet, 0, sizeof packet);
-	
-	while (Serial.available() > 0 && packetElement < packetSize)
+	while (Serial.available() > 0 && messageIndex < MESSAGE_SIZE)
 	{
-		packet[packetElement] = Serial.read();
-		packetElement++;
+		message[messageIndex] = Serial.read();
+		messageIndex++;
 		delay(3);
 	}
 	
-	if (checkSum == packet[2])
+	if(CHECK_SUM == message[CHECKSUM_INDEX] && ((botId == message[ID_INDEX] || 255 == message[ID_INDEX])))
 	{
-		if (id == packet[0])
+		for(int index = 0; index < 8; index++)
+			inboxMessageBuffer[(index)] = message[(index)];
+	}
+}
+
+void Communicator::SendMessage(byte botId)
+{
+	if(CHECK_SUM == outboxMessageBuffer[CHECKSUM_INDEX] && botId == outboxMessageBuffer[ID_INDEX])
+	{
+		for(int index = 0; index < 8; index++)
+			Serial.write(outboxMessageBuffer[index]);
+	}
+	
+	memset(outboxMessageBuffer, 0, sizeof outboxMessageBuffer);
+}
+
+bool Communicator::CheckForCommand(byte botId)
+{
+	bool commandIsValid = false;
+	bool commandIsRecieved = false;
+	unsigned long checkTime = 3000;
+	unsigned long startTime;
+	byte tempBuffer[8];
+		
+	GetMessage(botId);
+	if(inboxMessageBuffer[ID_INDEX] == botId)
+		commandIsRecieved = true;
+	
+	if(commandIsRecieved)
+	{
+		for(int index = 0; index < 8; index++)
 		{
-			command = packet[1];
+			outboxMessageBuffer[index] = inboxMessageBuffer[index];
+			tempBuffer[index] = inboxMessageBuffer[index];
+		}
+	
+			
+		SendMessage(botId);
+	
+		startTime = millis();
+		while((millis() - startTime) < checkTime)
+		{
+			GetMessage(botId);
+			if(inboxMessageBuffer[COMMAND_INDEX] == 0 && inboxMessageBuffer[ID_INDEX] == botId)
+			{
+				commandIsValid = true;
+			}
+		}
+		
+		if(commandIsValid)
+		{
+			for(int index = 0; index < 8; index++)
+				inboxMessageBuffer[(index)] = tempBuffer[(index)];
 		}
 	}
 	
-}
-
-
-void Communicator::ExecuteCommand(byte command)
-{
-}
-
-void Communicator::SendMessage(byte message)
-{
-	Serial.write(message);
+	return commandIsValid;
+	
 }
 
 

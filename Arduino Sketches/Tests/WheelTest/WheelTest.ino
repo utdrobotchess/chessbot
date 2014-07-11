@@ -3,19 +3,22 @@
 
 Wheel leftWheel('L');
 Wheel rightWheel('R'); 
-
+long startTime = millis();
+long time;
+  
 void setup()
 { 
-  attachInterrupt(rightWheel.encoderInterruptPinRef, RightHandleEncoderPinAInterrupt, RISING); 
-  attachInterrupt(leftWheel.encoderInterruptPinRef, LeftHandleEncoderPinAInterrupt, RISING);  
+  attachInterrupt(leftWheel.ReturnEncoderInterruptPinRef(), LeftHandleEncoderPinAInterrupt, RISING);  
+  attachInterrupt(rightWheel.ReturnEncoderInterruptPinRef(), RightHandleEncoderPinAInterrupt, RISING);
   Serial.begin(9600);
 }
 
 void loop() 
 { 
+  AngularVelocityTest();
 }
 
-void movementTest()
+void RotateTest()
 {
   leftWheel.Rotate(100);
   rightWheel.Rotate(100);
@@ -28,16 +31,29 @@ void movementTest()
   delay(1000);
   leftWheel.Rotate(0);
   rightWheel.Rotate(0);
-  delay(1000);
-  leftWheel.HardStop();
-  rightWheel.HardStop();
 }
 
-void encoderTest()
+void EncoderTest()
 {
-    Serial.println(rightWheel.encoderTickCount);
-    Serial.println(leftWheel.encoderTickCount);
+    Serial.print(leftWheel.ReturnEncoderTickCount());
+    Serial.print(" ");
+    Serial.println(rightWheel.ReturnEncoderTickCount());
     delay(10);  
+}
+
+void AngularVelocityTest()
+{
+  rightWheel.ControlAngularVelocity(0.4);
+  leftWheel.ControlAngularVelocity(0);
+  Serial.print(leftWheel.ReturnCurrentPWM());
+  Serial.print(" ");
+  Serial.println(leftWheel.MeasureAngularVelocity()); 
+}
+
+void AngularVelocityTrackingTest()
+{
+  time = millis();
+  leftWheel.ControlAngularVelocity(time/2000.0);
 }
 
 void RightHandleEncoderPinAInterrupt()

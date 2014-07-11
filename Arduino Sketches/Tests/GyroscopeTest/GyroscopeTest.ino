@@ -19,10 +19,10 @@ void angleEstimationTest()
 {
   delay(10);
   gyro.UpdateAngles();
-  Serial.print(gyro.anglesXYZ[0]);
+  Serial.print(gyro.ReturnXAngle());
   Serial.print(" ");
-  Serial.print(gyro.anglesXYZ[1]);
+  Serial.print(gyro.ReturnYAngle());
   Serial.print(" ");
-  Serial.print(gyro.anglesXYZ[2]);
+  Serial.print(gyro.ReturnZAngle());
   Serial.println(".");
 }

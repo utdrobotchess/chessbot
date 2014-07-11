@@ -9,15 +9,24 @@
 
 class ChessBot
 {
-	public:
+public:
     ChessBot();
     void Setup();
+    
+    void CheckForNextMove();
+    void StoreNextCommand();
+    void Check();
+    void ExecuteCommands();
+   
+	int  MeasureSquareState();
+    
+    void Rotate(float endAngle);
+    void HardStop();
     void CrossSquares(int numOfSquares);
-    void Rotate(double endAngle);
-    void UpdateSquareState();
-    void Center();
-    void AlignToBlackEdge();
-    void AlignToWhiteEdge();
+    void Center(float firstRotation, float secondRotation);
+    void AlignToEdge();
+
+    void Unwind();
     
     Communicator xBee;
     Wheel leftWheel;
@@ -27,10 +36,16 @@ class ChessBot
     Photodiode backLeftPhotoDiode;
     Photodiode frontRightPhotoDiode;
     Photodiode frontLeftPhotoDiode;
-		
-    int squareState;
+    
+private:
+	
+	
+	byte commandBuffer[10][8];
     double angleState;
-			
+    uint8_t robotID;
+    
+    
+    
 };
 
 #endif
