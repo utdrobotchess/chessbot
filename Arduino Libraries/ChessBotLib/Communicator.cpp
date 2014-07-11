@@ -14,7 +14,7 @@ Communicator::Communicator()
  CHECK_SUM			117
  */
 void Communicator::GetMessage(byte botId)
-{		A		 		 				 
+{		 		 				 
 	int messageIndex = 0;
 	byte message[MESSAGE_SIZE] = {0};
 	memset(inboxMessageBuffer, 0, sizeof inboxMessageBuffer);
