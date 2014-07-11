@@ -86,7 +86,7 @@ class Gyroscope
     #define PLL_EXTERNAL19      5   // 19.2 Mhz
 
     
-    public:
+private:
     int XYZoffsets[3];
     float dx, dy, dz;
 	float anglesXYZ[3];
@@ -95,6 +95,7 @@ class Gyroscope
     uint8_t _I2C_address;
     uint8_t _buff[6]; 
     
+public:
     Gyroscope();
     void Init();
     void Reinitialize();
@@ -127,6 +128,9 @@ class Gyroscope
     void ReadGyro(float *_GyroX, float *_GyroY, float *_GyroZ);
     void ReadGyroCal(float *_GyroXYZ);
     void UpdateAngles();
+    float ReturnXAngle();
+    float ReturnYAngle();
+    float ReturnZAngle();
     
     //Read/Write
     void WriteToRegister(uint8_t _registerAddress, uint8_t _newRegisterValue);

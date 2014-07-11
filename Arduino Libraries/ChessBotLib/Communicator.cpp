@@ -5,16 +5,16 @@ Communicator::Communicator()
 } 
 
 /*
-	ID_INDEX			0
-	COMMAND_INDEX		1
-	CHECKSUM_INDEX		7
-	
-	PACKET_SIZE			8
-	
-    CHECK_SUM			117
-*/
+ ID_INDEX			0
+ COMMAND_INDEX		1
+ CHECKSUM_INDEX		7
+ 
+ PACKET_SIZE			8
+ 
+ CHECK_SUM			117
+ */
 void Communicator::GetMessage(byte botId)
-{				 		 				 
+{		A		 		 				 
 	int messageIndex = 0;
 	byte message[MESSAGE_SIZE] = {0};
 	memset(inboxMessageBuffer, 0, sizeof inboxMessageBuffer);
@@ -51,7 +51,7 @@ bool Communicator::CheckForCommand(byte botId)
 	unsigned long checkTime = 3000;
 	unsigned long startTime;
 	byte tempBuffer[8];
-		
+    
 	GetMessage(botId);
 	if(inboxMessageBuffer[ID_INDEX] == botId)
 		commandIsRecieved = true;
@@ -63,10 +63,10 @@ bool Communicator::CheckForCommand(byte botId)
 			outboxMessageBuffer[index] = inboxMessageBuffer[index];
 			tempBuffer[index] = inboxMessageBuffer[index];
 		}
-	
-			
+        
+        
 		SendMessage(botId);
-	
+        
 		startTime = millis();
 		while((millis() - startTime) < checkTime)
 		{

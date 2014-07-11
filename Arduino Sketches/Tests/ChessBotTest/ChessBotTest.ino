@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <ChessBot.h>
 
-ChessBot Bot = ChessBot();
+ChessBot Bot;
 int sign = -1;
 byte corrCommand = 7;
 
@@ -9,73 +9,63 @@ byte corrCommand = 7;
 
 void setup()
 {
-  Serial.begin(9600);
+  Bot = ChessBot();
   Bot.Setup();
-  attachInterrupt(Bot.rightWheel.encoderInterruptPinRef, RightHandleEncoderPinAInterrupt, RISING); 
-  attachInterrupt(Bot.leftWheel.encoderInterruptPinRef, LeftHandleEncoderPinAInterrupt, RISING);  
+  attachInterrupt(Bot.leftWheel.ReturnEncoderInterruptPinRef(), LeftHandleEncoderPinAInterrupt, RISING);  
+  attachInterrupt(Bot.rightWheel.ReturnEncoderInterruptPinRef(), RightHandleEncoderPinAInterrupt, RISING);
 }
 
 void loop()
 {
-  //Test 1: See if the robot moves in a three by three square
-    //ThreeByThreeSquareMotionTest();
-  
-  //Test 2: See if the robot moves diagonally the number of squares that is needed.
-    //DiagonalMotionTest();
-  
-  //Test 3:See if Communication is working.
-    Bot.CheckForNextMove();
-    
+  SquareMotionTest(2);
+  DiagonalTest(2);
 }
 
-
-
-
-//Tests Methods: Use these to test and see if they work
-
-
-/*void RotateTest()
+void rotateTest()
 {
-  Bot.xBee.GetMessage(); 
-  if (Bot.xBee.data == corrCommand)
-  {
     for (int i = 1; i < 5; i++)
     {
       sign = sign * -1;
-      Bot.Rotate(i*90*sign);
+      Bot.Rotate(i*45*sign);
+      delay(100);
     }
     
-    Bot.xBee.data = 0;
-  }
-  else;
-}*/
-
-void ThreeByThreeSquareMotionTest()
-{
-   Bot.CrossSquares(2);
-   Bot.Rotate(90);
-   Bot.CrossSquares(2);
-   Bot.Rotate(90);
-   Bot.CrossSquares(2);
-   Bot.Rotate(90);
-   Bot.CrossSquares(2);
-   Bot.Rotate(90);
-   Bot.Center(90,-90);
 }
 
-void DiagonalMotionTest()
+void SquareMotionTest(int crossNumberofSquares)
 {
-    Bot.Rotate(45);
-    Bot.CrossSquares(2);
-    Bot.Rotate(-225);
-    Bot.Center(90,-90);
+   Bot.CrossSquares(crossNumberofSquares);
+   Bot.Rotate(90);
+   Bot.CrossSquares(crossNumberofSquares);
+   Bot.Rotate(90);
+   Bot.CrossSquares(crossNumberofSquares);
+   Bot.Rotate(90);
+   Bot.CrossSquares(crossNumberofSquares);
+   Bot.Center(180,-90);
+}
+
+void DiagonalTest(int crossNumberofSquares)
+{
+  Bot.Rotate(45);
+  Bot.CrossSquares(crossNumberofSquares);
+  Bot.Center(-135,-90);
+}
+
+void GyroTest()
+{
+  Bot.gyro.UpdateAngles();
+  Serial.println(Bot.gyro.ReturnZAngle());
+}
+
+void CheckForNextMove()
+{
+  Bot.CheckForNextMove();
 }
 
 void RightHandleEncoderPinAInterrupt()
 {
     Bot.rightWheel.HandleEncoderPinAInterrupt();
 }
-
 
 void LeftHandleEncoderPinAInterrupt()
 {

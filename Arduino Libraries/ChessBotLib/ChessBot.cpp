@@ -14,9 +14,7 @@ ChessBot::ChessBot()
     frontRightPhotoDiode =  Photodiode("FR");
     frontLeftPhotoDiode  =  Photodiode("FL");
     
-    commandBuffer[10][8]= 0;
     angleState = 0;
-    robotID = 1;
 }
 
 void ChessBot::Setup()
@@ -40,15 +38,15 @@ void ChessBot::CheckForNextMove()
 		{
 			if(xBee.inboxMessageBuffer[1] == 0xff)
 				readyToExecute = true;
-				
+            
 			else if(commandRowIndex == 10)
 				bufferOverflow = true;
-				
+            
 			else
 			{
 				for(int columnIndex = 0; columnIndex < sizeof xBee.inboxMessageBuffer; columnIndex++)
 					commandBuffer[commandRowIndex][columnIndex] = xBee.inboxMessageBuffer[(columnIndex)];
-					
+                
 				commandRowIndex++;
 			}		
 		}
@@ -56,7 +54,7 @@ void ChessBot::CheckForNextMove()
 	
 	if(readyToExecute)
 		ExecuteCommands();
-		
+    
 	else if(bufferOverflow)
 		memset(commandBuffer, 0, sizeof commandBuffer);
 }
@@ -83,10 +81,10 @@ void ChessBot::ExecuteCommands()
 			case 3:
 				if (commandBuffer[commandRowIndex][4] == 0x2D)
 					Center(-(commandBuffer[commandRowIndex][2]),commandBuffer[commandRowIndex][3]);
-					
+                
 				else if(commandBuffer[commandRowIndex][5] == 0x2D)
 					Center(commandBuffer[commandRowIndex][2],-(commandBuffer[commandRowIndex][3]));
-					
+                
 				break;
 				
 			default:

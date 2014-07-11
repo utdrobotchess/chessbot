@@ -1,22 +1,22 @@
 #include "Wheel.h"
 
 /*	
-	Interrupt:
-		L_Encoder_interrupt 	pin 0	<- 0 is a reference to pin 2 
-		R_Encoder_interrupt 	pin 1	<- 1 is a reference to pin 3 
-	Pins:		
-		L_Encoder_A				pin 2
-		L_Encoder_B				pin 4		
-		
-		R_Encoder_A				pin 3
-		R_Encoder_B				pin 5
-			
-		R_Motor_1A				pin 9
-		R_Motor_2A				pin 8
-								
-		L_Motor_3A				pin 11
-		L_Motor_4A				pin 10
-*/
+ Interrupt:
+ L_Encoder_interrupt 	pin 0	<- 0 is a reference to pin 2 
+ R_Encoder_interrupt 	pin 1	<- 1 is a reference to pin 3 
+ Pins:		
+ L_Encoder_A				pin 2
+ L_Encoder_B				pin 4		
+ 
+ R_Encoder_A				pin 3
+ R_Encoder_B				pin 5
+ 
+ R_Motor_1A				pin 9
+ R_Motor_2A				pin 8
+ 
+ L_Motor_3A				pin 11
+ L_Motor_4A				pin 10
+ */
 
 Wheel::Wheel()
 {
@@ -24,9 +24,14 @@ Wheel::Wheel()
 
 Wheel::Wheel(char whichWheel)
 {
-
-	TICKS_PER_REV = 3000;
-	
+    currentPWM = 0;
+	encoderTickCount = 0;
+    previousEncoderTickCount = 0;
+    timeOfLastUpdate = micros();
+    
+    angularVelocityController = PIDController(1, 18.0, 15.0, 10.0, 255.0, -255.0);
+    
+    WHICH_WHEEL = whichWheel;
 	if(whichWheel == 'L')
 	{
 		pinMode(L_Encoder_A, INPUT);       
@@ -39,11 +44,10 @@ Wheel::Wheel(char whichWheel)
 		
 		encoderInterruptPinRef = L_Encoder_interrupt;
 		encoderPinB = L_Encoder_B;
-	
+        
 		motorPin1 = L_Motor_3A;
 		motorPin2 = L_Motor_4A;
 		
-		wheel = whichWheel;
 	}
 	else if(whichWheel == 'R')
 	{
@@ -60,14 +64,42 @@ Wheel::Wheel(char whichWheel)
 		
 		motorPin1 = R_Motor_1A;
 		motorPin2 = R_Motor_2A;
-
-		wheel = whichWheel;
+        
 	}	
+}
+
+void Wheel::ZeroEncoderTickCount()
+{
+    encoderTickCount = 0;
+}
+
+long Wheel::ReturnEncoderTickCount()
+{
+    return encoderTickCount;
+}
+
+int Wheel::ReturnCurrentPWM()
+{
+    return currentPWM;
+}
+
+byte Wheel::ReturnEncoderInterruptPinRef()
+{
+    return encoderInterruptPinRef;
+}
+
+void Wheel::HandleEncoderPinAInterrupt()
+{
+	encoderPinBState = digitalReadFast(encoderPinB);
+	if (WHICH_WHEEL == 'L')
+		encoderTickCount -= encoderPinBState ? -1 : +1; 
+	else
+		encoderTickCount += encoderPinBState ? -1 : +1;
 }
 
 void Wheel::Rotate(int PWM)
 {
-	 
+    
 	if(PWM > 255)
         PWM = 255;
     else if(PWM < -255)
@@ -87,18 +119,33 @@ void Wheel::Rotate(int PWM)
     }
 }
 
-void Wheel::HandleEncoderPinAInterrupt() //might need to make a interrupt class
+float Wheel::MeasureAngularVelocity() 
 {
-	encoderPinBState = digitalReadFast(encoderPinB);
-	if (wheel== 'L')
-		encoderTickCount -= encoderPinBState ? -1 : +1; 
-	else
-		encoderTickCount += encoderPinBState ? -1 : +1;
+    now = micros();
+    float angularVelocity;
+    
+    if(now > timeOfLastUpdate)
+    {
+        float dt = (now - timeOfLastUpdate)/1000000.0;
+        angularVelocity = (encoderTickCount - previousEncoderTickCount)/(TICKS_PER_REV*dt);
+        timeOfLastUpdate = now;
+    }
+    else
+        timeOfLastUpdate = now;
+    
+    previousEncoderTickCount = encoderTickCount;
+    
+    return angularVelocity;
 }
 
-void Wheel::HardStop()
+void Wheel::ControlAngularVelocity(float angularVelocitySetpoint)
 {
-	Rotate(-1*currentPWM);
-	delay (50);
-	Rotate(0);
+    float angularVelocity = MeasureAngularVelocity();
+    int PWM = (int)angularVelocityController.ComputeOutput(angularVelocity, angularVelocitySetpoint);
+    Rotate(PWM);
+}
+
+void Wheel::ResetAngularVelocityController()
+{
+    angularVelocityController.ResetMemory();
 }

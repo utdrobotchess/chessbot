@@ -31,14 +31,12 @@ double PIDController::ComputeOutput(double input, double setPoint)
     {
         proportionalOutput = kp*(setPoint - input);
         integralOutput += ki*(setPoint - input);
+        derivativeOutput = kd*(previousInput - input);
         
         if(integralOutput > maxOutput)
             integralOutput = maxOutput;
         else if(integralOutput < minOutput)
             integralOutput = minOutput;
-        
-        derivativeOutput = kd*(previousInput - input);
-        previousInput = input;
         
         controllerOutput = proportionalOutput + integralOutput + derivativeOutput;
         
@@ -47,6 +45,7 @@ double PIDController::ComputeOutput(double input, double setPoint)
         else if(controllerOutput < minOutput)
             controllerOutput = minOutput;
         
+        previousInput = input;
         previousSampleTime = currentSampleTime;
     
     }
@@ -79,7 +78,6 @@ void PIDController::SetOutputLimits(double MAXOUTPUT, double MINOUTPUT)
 
 void PIDController::ResetMemory()
 {
-    
     integralOutput = 0;
     previousSampleTime = millis();
     previousInput = 0;

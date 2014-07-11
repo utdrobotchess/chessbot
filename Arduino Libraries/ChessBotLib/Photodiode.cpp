@@ -5,10 +5,7 @@ Photodiode::Photodiode()
 }
 
 Photodiode::Photodiode(String whichPhotodiode)
-{
-    
-	
-	
+{	
     if(whichPhotodiode == "FR")
         photodiodePin = frontRightPhotodiodePin;
     

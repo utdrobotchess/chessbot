@@ -195,6 +195,21 @@ void Gyroscope::UpdateAngles()
         timeOfLastUpdate = now;
 }
 
+float Gyroscope::ReturnXAngle()
+{
+    return anglesXYZ[0];
+}
+
+float Gyroscope::ReturnYAngle()
+{
+    return anglesXYZ[1];
+}
+
+float Gyroscope::ReturnZAngle()
+{
+    return anglesXYZ[2];
+}
+
 void Gyroscope::WriteToRegister(uint8_t _registerAddress, uint8_t _newRegisterValue) 
 {
     Wire.beginTransmission(_I2C_address); 

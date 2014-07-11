@@ -10,11 +10,13 @@ class Photodiode
     #define frontLeftPhotodiodePin A14
     #define frontRightPhotodiodePin A15
     
-    public:
+public:
     Photodiode();
     explicit Photodiode(String whichPhotodiode);
     int GetAnalogLightMeasurement();
     bool GetDigitalLightMeasurement(int cutoff);
+    
+private:
     int photodiodePin;
 };
 

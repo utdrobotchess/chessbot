@@ -1,18 +1,17 @@
 #include <Wire.h>
 #include <Communicator.h>
-Communicator xbee = Communicator();
-
+Communicator xbee;
 byte botId = 1;
+
 void setup()
 { 
   Serial.begin(9600);
 }
 
-void loop() 
-{	
-  xbee.CheckForCommand(botId);
-}
 
+void loop() 
+{
+}
 
 void getMessageTest()
 {
@@ -34,39 +33,7 @@ void sendMessageTest()
   delay(1000);
 }
 
-//----------------------------------------------------------------------------------------
-  /*bool commandIsValid = false;
-  bool confirmationMessageReceived = false;
-  unsigned long checkTime = 2000;
-  unsigned long startTime;
-  byte tempBuffer[8];
-		
-  xbee.GetMessage(botId);
-	
-  for(int index = 0; index < 8; index++)
-  {
-    xbee.outboxMessageBuffer[index] = xbee.inboxMessageBuffer[index];
-    tempBuffer[index] = xbee.inboxMessageBuffer[index];
-  }		
-  xbee.SendMessage(botId);
-
-  startTime = millis();
-  while((millis() - startTime) < checkTime)
-  {
-    xbee.GetMessage(botId);
-    if(xbee.inboxMessageBuffer[COMMAND_INDEX] == 0 && xbee.inboxMessageBuffer[ID_INDEX] == botId)
-    {  
-      commandIsValid = true;
-      confirmationMessageReceived = true;
-    }
-    byte time = (millis() - startTime);
-    Serial.write(time);
-  }
-	
-  if(commandIsValid)
-  {
-    for(int index = 0; index < 8; index++)
-      xbee.inboxMessageBuffer[(index)] = tempBuffer[(index)];
-  }
-*/
-
+void CheckForCommandTest()
+{
+  xbee.CheckForCommand(botId);
+}

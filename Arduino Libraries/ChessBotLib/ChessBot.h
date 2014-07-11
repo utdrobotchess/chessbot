@@ -14,19 +14,15 @@ public:
     void Setup();
     
     void CheckForNextMove();
-    void StoreNextCommand();
-    void Check();
     void ExecuteCommands();
-   
-	int  MeasureSquareState();
     
-    void Rotate(float endAngle);
-    void HardStop();
     void CrossSquares(int numOfSquares);
+    void HardStop();
+    void Rotate(float endAngle);
+    void Unwind();
+    int  MeasureSquareState();
     void Center(float firstRotation, float secondRotation);
     void AlignToEdge();
-
-    void Unwind();
     
     Communicator xBee;
     Wheel leftWheel;
@@ -38,13 +34,10 @@ public:
     Photodiode frontLeftPhotoDiode;
     
 private:
-	
-	
-	byte commandBuffer[10][8];
+    
+    byte commandBuffer[10][8];
     double angleState;
     uint8_t robotID;
-    
-    
     
 };
 
