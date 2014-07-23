@@ -13,8 +13,9 @@ void setup()
 
 void loop()
 {
-  SquareMotionTest(2);
-  DiagonalTest(2);
+  SquareMotionTest(7);
+  DiagonalTest(7);
+  //rotateTest();
   
 }
 
