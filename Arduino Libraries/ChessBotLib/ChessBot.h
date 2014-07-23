@@ -40,6 +40,7 @@ public:
     
 private:
     
+    long squareSize //measured in encoder ticks
     byte commandBuffer[10][8];
     double angleState;
     

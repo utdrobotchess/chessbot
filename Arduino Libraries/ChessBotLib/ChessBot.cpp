@@ -241,8 +241,11 @@ void ChessBot::CrossSquares(int numOfSquares)
     }
     else
     {
+        bool startedMeasuring = false;
+        bool finishedMeasuring = false;
         while(numOfCrossings < numOfSquares)
         {
+            long leftTicksStartMeasurement, rightTicksStartMeasurement;
             byte squareState = MeasureSquareState();
             switch (squareState) 
             {
@@ -258,6 +261,21 @@ void ChessBot::CrossSquares(int numOfSquares)
                 case 0xB:
                 case 0x4:
                     adjustAngle = adjustAngleIntegrator.ComputeOutput(0,-1.5);
+                    break;
+                    
+                case 0xC:
+                case 0x3:
+                    if (startedMeasuring && !finishedMeasuring && numOfSquares == 1) 
+                    {
+                        squareSize = ((leftWheel.ReturnEncoderTickCount() - leftTicksStartMeasurement) + (rightWheel.ReturnEncoderTickCount() - rightTicksStartMeasurement))/2;
+                        finishedMeasuring = true;
+                    }
+                    else if(!finishedMeasuring)
+                    {
+                        leftTicksStartMeasurement = leftWheel.ReturnEncoderTickCount();
+                        rightTicksStartMeasurement  = rightWheel.ReturnEncoderTickCount();
+                        startedMeasuring = true;
+                    }
                     break;
                     
                 default:
