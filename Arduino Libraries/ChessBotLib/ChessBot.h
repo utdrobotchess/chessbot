@@ -9,6 +9,7 @@
 #include <EEPROM.h>
 
 #define robotIdEEPROMAddress 1
+#define DEFAULT_SQUARE_DISTANCE_IN_ENC_TICKS 2950
 
 class ChessBot
 {
@@ -20,14 +21,19 @@ public:
     void ExecuteCommands();
     byte readBotId();
     void writeBotId(byte Id);
-    
-    void CrossSquares(int numOfSquares);
     void HardStop();
     void Rotate(float endAngle);
     void Unwind();
     int  MeasureSquareState();
+    
+    void CrossSquares(int numOfSquares, bool measureSquareDistance = true);
+    void CrossDiagonal(int numOfSquares);
+    void CrossAlongEdge(int numOfSquares);
+    void CrossStraight(int numOfSquares, bool measureSquareDistance);
+    
     void Center(float firstRotation, float secondRotation);
     void AlignToEdge();
+    void MoveDistance(long numOfEncoderTicks)
     
     Communicator xBee;
     Wheel leftWheel;
@@ -40,9 +46,9 @@ public:
     
 private:
     
-    long squareSize //measured in encoder ticks
     byte commandBuffer[10][8];
     double angleState;
+    long squareDistance;
     
 };
 
