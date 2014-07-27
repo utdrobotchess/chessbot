@@ -31,7 +31,6 @@ Wheel::Wheel(char whichWheel)
     
     angularVelocityController = PIDController(1, 18.0, 15.0, 10.0, 255.0, -255.0);
     
-    WHICH_WHEEL = whichWheel;
 	if(whichWheel == 'L')
 	{
 		pinMode(L_Encoder_A, INPUT);       
@@ -91,15 +90,11 @@ byte Wheel::ReturnEncoderInterruptPinRef()
 void Wheel::HandleEncoderPinAInterrupt()
 {
 	encoderPinBState = digitalReadFast(encoderPinB);
-	if (WHICH_WHEEL == 'L')
-		encoderTickCount -= encoderPinBState ? -1 : +1; 
-	else
-		encoderTickCount += encoderPinBState ? -1 : +1;
+    encoderTickCount -= encoderPinBState ? -1 : +1; 
 }
 
 void Wheel::Rotate(int PWM)
 {
-    
 	if(PWM > 255)
         PWM = 255;
     else if(PWM < -255)

@@ -42,7 +42,6 @@ public:
     void ResetAngularVelocityController();
     
 private:
-    char WHICH_WHEEL;
     byte motorPin1;
     byte motorPin2;
     byte encoderInterruptPinRef;
