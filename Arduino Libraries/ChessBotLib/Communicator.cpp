@@ -39,6 +39,7 @@ void Communicator::SendMessage(byte botId)
 	{
 		for(int index = 0; index < 8; index++)
 			Serial.write(outboxMessageBuffer[index]);
+        Serial.write(0x0D);
 	}
 	
 	memset(outboxMessageBuffer, 0, sizeof outboxMessageBuffer);
