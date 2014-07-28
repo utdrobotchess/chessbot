@@ -15,8 +15,10 @@ void loop()
 {
   SquareMotionTest(7);
   DiagonalTest(7);
+  //CheckForNextMoveTest();
+  //MoveDistanceTest();
   //rotateTest();
-  
+  //CrossAlongEdgeTest(7);
 }
 
 void rotateTest()
@@ -56,7 +58,7 @@ void GyroTest()
   Serial.println(Bot.gyro.ReturnZAngle());
 }
 
-void CheckForNextMove()
+void CheckForNextMoveTest()
 {
   Bot.CheckForNextMove();
 }
@@ -69,11 +71,27 @@ void ReadRobotIDTest()
 
 void RightHandleEncoderPinAInterrupt()
 {
-    Bot.rightWheel.HandleEncoderPinAInterrupt();
+  Bot.rightWheel.HandleEncoderPinAInterrupt();
 }
 
 void LeftHandleEncoderPinAInterrupt()
 {
-    Bot.leftWheel.HandleEncoderPinAInterrupt();
+  Bot.leftWheel.HandleEncoderPinAInterrupt();
+}
+
+void MoveDistanceTest()
+{
+  Bot.MoveDistance(-200);
+}
+
+void CrossAlongEdgeTest(int crossNumberOfSquares)
+{
+  Bot.AlignToEdge();
+  Bot.MoveDistance(500);
+  Bot.Rotate(90);
+  Bot.CrossSquares(crossNumberOfSquares);
+  Bot.Rotate(90);
+  Bot.MoveDistance(700);
+  Bot.Center(0,90);
 }
 
