@@ -10,6 +10,7 @@
 
 #define robotIdEEPROMAddress 1
 #define DEFAULT_SQUARE_DISTANCE_IN_ENC_TICKS 2950
+#define ROBOT_DIAMETER_IN_METERS 0.26
 
 class ChessBot
 {
@@ -33,7 +34,7 @@ public:
     
     void Center(float firstRotation, float secondRotation);
     void AlignToEdge();
-    void MoveDistance(long numOfEncoderTicks)
+    void MoveDistance(long numOfEncoderTicks, float speed = 0.4);
     
     Communicator xBee;
     Wheel leftWheel;
