@@ -32,9 +32,9 @@ public:
     void CrossAlongEdge(int numOfSquares);
     void CrossStraight(int numOfSquares, bool measureSquareDistance);
     
-    void Center(float firstRotation, float secondRotation);
+    void Center(int firstEdge, int secondEdge);
     void AlignToEdge();
-    void MoveDistance(long numOfEncoderTicks, float speed = 0.4);
+    void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
     
     Communicator xBee;
     Wheel leftWheel;

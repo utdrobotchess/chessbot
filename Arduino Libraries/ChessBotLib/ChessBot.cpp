@@ -49,7 +49,7 @@ void ChessBot::CheckForNextMove()
 	{
 		if(xBee.CheckForCommand(readBotId()))
 		{
-			if(xBee.inboxMessageBuffer[1] == 0xff)
+			if(xBee.inboxMessageBuffer[1] == 0xFF)
 				readyToExecute = true;
             
 			else if(commandRowIndex == 10)
@@ -80,26 +80,68 @@ void ChessBot::ExecuteCommands()
 	{
 		switch(commandBuffer[commandRowIndex][1])
 		{
-			case 1:
+			case 0x1:
 				CrossSquares(commandBuffer[commandRowIndex][2]);
 				break;
 				
-			case 2:
-				if (commandBuffer[commandRowIndex][3] == 0x2D)
-					Rotate(-(commandBuffer[commandRowIndex][2]));
-				else
-					Rotate(commandBuffer[commandRowIndex][2]);
-				break;
-				
-			case 3:
-				if (commandBuffer[commandRowIndex][4] == 0x2D)
-					Center(-(commandBuffer[commandRowIndex][2]),commandBuffer[commandRowIndex][3]);
+			case 0x2:
+            {
+                float endAngle = (commandBuffer[commandRowIndex][3] << 8) | commandBuffer[commandRowIndex][4];
                 
-				else if(commandBuffer[commandRowIndex][5] == 0x2D)
-					Center(commandBuffer[commandRowIndex][2],-(commandBuffer[commandRowIndex][3]));
+                if(commandBuffer[commandRowIndex][2] == 0x2D)
+                    endAngle *= -1;
+                
+                Rotate(endAngle);
+				break;
+            }
+				
+			case 0x3:
+            {
+                int firstEdge = commandBuffer[commandRowIndex][3];
+                int secondEdge = commandBuffer[commandRowIndex][5];
+                
+                if(commandBuffer[commandRowIndex][2] == 0x2D)
+                    firstEdge *= -1;
+                
+                if(commandBuffer[commandRowIndex][4] == 0x2D)
+                    secondEdge *= -1;
+                
+                Center(firstEdge, secondEdge);
                 
 				break;
+            }
 				
+            case 0x4:
+                writeBotId(commandBuffer[commandRowIndex][2]);
+                break;
+                
+            case 0x5:
+                xBee.outboxMessageBuffer[0] = readBotId();
+                xBee.outboxMessageBuffer[1] = 0x5; 
+                xBee.outboxMessageBuffer[2] = MeasureSquareState();
+                xBee.outboxMessageBuffer[7] = 0x75;
+                xBee.SendMessage(readBotId());
+                break;
+                
+            case 0x6:
+                Unwind();
+                break;
+                
+            case 0x7:
+                AlignToEdge();
+                break;
+                
+            case 0x8:
+            {
+                long numOfEncoderTicks = (commandBuffer[commandRowIndex][3] << 24) | (commandBuffer[commandRowIndex][4] << 16) |
+                                            (commandBuffer[commandRowIndex][5] << 8) | commandBuffer[commandRowIndex][6];
+                
+                if(commandBuffer[commandRowIndex][2] == 0x2D)
+                    numOfEncoderTicks *= -1;
+                
+                MoveDistance(numOfEncoderTicks);
+            }
+                
 			default:
 				break;
 		}
@@ -254,11 +296,12 @@ void ChessBot::CrossDiagonal(int numOfSquares)
         rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
     }
     
+    targetSpeed = 0.4;
     long leftEncoderTickCountAtEdge = leftWheel.ReturnEncoderTickCount();
     long rightEncoderTickCountAtEdge = rightWheel.ReturnEncoderTickCount();
     
-    while((leftWheel.ReturnEncoderTickCount() - leftEncoderTickCountAtEdge) < squareDistance/1.414 - 100 && 
-          (rightWheel.ReturnEncoderTickCount() - rightEncoderTickCountAtEdge) < squareDistance/1.414 - 100)
+    while((leftWheel.ReturnEncoderTickCount() - leftEncoderTickCountAtEdge) < squareDistance/1.414 - 500 && 
+          (rightWheel.ReturnEncoderTickCount() - rightEncoderTickCountAtEdge) < squareDistance/1.414 - 500)
     {
         crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed,targetSpeed);
         gyro.UpdateAngles();
@@ -274,10 +317,10 @@ void ChessBot::CrossDiagonal(int numOfSquares)
 void ChessBot::CrossAlongEdge(int numOfSquares)
 {
     PIDController headingController = PIDController(10, 0.015, 1.0/9000.0, 0.001, 1.0, -1.0);
-    PIDController botAccelerator = PIDController(10, 0, 0.01, 0, 1.0, 0.0);
+    PIDController botAccelerator = PIDController(10, 0, 0.01, 0, 2.0, 0.0);
     PIDController adjustAngleIntegrator = PIDController(10, 0, 1, 0, 90, -90);
     
-    float targetSpeed = 1;
+    float targetSpeed = 1.7;
     float crossingSpeed = 0;
     byte startingSquare = MeasureSquareState();
     int numOfCrossings = 0;
@@ -306,8 +349,14 @@ void ChessBot::CrossAlongEdge(int numOfSquares)
                 
                 
             default:
-                if(numOfSquares - numOfCrossings == 1)
-                    targetSpeed = 0.5;
+                if(numOfSquares - numOfCrossings < 3)
+                {
+                    targetSpeed = 1;
+                    if(numOfSquares - numOfCrossings == 1)
+                        targetSpeed = 0.5;
+                }
+                
+
                 
                 if((startingSquare == 0x6 && squareState == 0x9) || (startingSquare == 0x9 && squareState == 0x6))
                 {
@@ -319,19 +368,19 @@ void ChessBot::CrossAlongEdge(int numOfSquares)
         
         gyro.UpdateAngles();
         
-        crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, 1);
+        crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, targetSpeed);
         leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
         rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
     }
 
-    
+    targetSpeed = 0.4;
     long leftEncoderTickCountAtEdge = leftWheel.ReturnEncoderTickCount();
     long rightEncoderTickCountAtEdge = rightWheel.ReturnEncoderTickCount();
     
     while((leftWheel.ReturnEncoderTickCount() - leftEncoderTickCountAtEdge) < squareDistance/2 - 100 && 
           (rightWheel.ReturnEncoderTickCount() - rightEncoderTickCountAtEdge) < squareDistance/2 - 100)
     {
-        crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, 0.4);
+        crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, targetSpeed);
         gyro.UpdateAngles();
         
         leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
@@ -345,10 +394,10 @@ void ChessBot::CrossAlongEdge(int numOfSquares)
 void ChessBot::CrossStraight(int numOfSquares, bool measureSquareDistance)
 {
     PIDController headingController = PIDController(10, 0.015, 1.0/9000.0, 0.001, 1.0, -1.0);
-    PIDController botAccelerator = PIDController(10, 0, 0.01, 0, 1.0, 0.0);
+    PIDController botAccelerator = PIDController(10, 0, 0.01, 0, 2.0, 0.0);
     PIDController adjustAngleIntegrator = PIDController(10, 0, 1, 0, 90, -90);
     
-    float targetSpeed = 1;
+    float targetSpeed = 1.7;
     float crossingSpeed = 0;
     byte startingSquare = MeasureSquareState();
     int numOfCrossings = 0;
@@ -396,8 +445,12 @@ void ChessBot::CrossStraight(int numOfSquares, bool measureSquareDistance)
                 break;
                 
             default:
-                if(numOfSquares - numOfCrossings == 1)
-                    targetSpeed = 0.5;
+                if(numOfSquares - numOfCrossings < 3)
+                {
+                    targetSpeed = 1;
+                    if(numOfSquares - numOfCrossings == 1)
+                        targetSpeed = 0.5;
+                }
                 
                 if((startingSquare == 0x0 && squareState == 0xF) || (startingSquare == 0xF && squareState == 0x0))
                 {
@@ -413,13 +466,14 @@ void ChessBot::CrossStraight(int numOfSquares, bool measureSquareDistance)
         rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
     }
     
+    targetSpeed = 0.4;
     long leftEncoderTickCountAtEdge = leftWheel.ReturnEncoderTickCount();
     long rightEncoderTickCountAtEdge = rightWheel.ReturnEncoderTickCount();
     
     while((leftWheel.ReturnEncoderTickCount() - leftEncoderTickCountAtEdge) < squareDistance/2 - 100 && 
           (rightWheel.ReturnEncoderTickCount() - rightEncoderTickCountAtEdge) < squareDistance/2 - 100)
     {
-        crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, 0.4);
+        crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, targetSpeed);
         gyro.UpdateAngles();
         
         leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
@@ -429,11 +483,14 @@ void ChessBot::CrossStraight(int numOfSquares, bool measureSquareDistance)
     HardStop();
 }
 
-void ChessBot::Center(float firstRotation, float secondRotation)
+void ChessBot::Center(int firstEdge, int secondEdge)
 {
 	byte squareState = MeasureSquareState();
     if(!(squareState == 0x0 || squareState == 0xF))
         return;
+    
+    float firstRotation = firstEdge*45;
+    float secondRotation = secondEdge*45;
     
     Rotate(firstRotation);
     AlignToEdge();
@@ -476,13 +533,15 @@ void ChessBot::AlignToEdge()
 	HardStop();
 }
     
-void ChessBot::MoveDistance(long numOfEncoderTicks, float maxSpeed)
+void ChessBot::MoveDistance(long numOfEncoderTicks, float targetSpeed)
 {
     PIDController headingController = PIDController(10, 1.0/300.0, 1.0/6000.0, 7.0/30.0, 1.0/3.0, -1.0/3.0);
-    PIDController botAccelerator = PIDController(10, 0, 1, 0, maxSpeed, -maxSpeed);
+    PIDController botAccelerator = PIDController(10, 0, 0.01, 0, 1, -1);
+    
+    float crossingSpeed = 0;
+    
     gyro.Reinitialize();
 	
-    
     leftWheel.ZeroEncoderTickCount();
     rightWheel.ZeroEncoderTickCount();
     
@@ -492,7 +551,7 @@ void ChessBot::MoveDistance(long numOfEncoderTicks, float maxSpeed)
         {
             gyro.UpdateAngles();
         
-            float crossingSpeed = botAccelerator.ComputeOutput(0, 1.0/100.0);
+            crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, targetSpeed);
             leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
             rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
         }
@@ -503,7 +562,7 @@ void ChessBot::MoveDistance(long numOfEncoderTicks, float maxSpeed)
         {
             gyro.UpdateAngles();
             
-            float crossingSpeed = botAccelerator.ComputeOutput(0, -1.0/100.0);
+            crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, -targetSpeed);
             leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
             rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
         }
