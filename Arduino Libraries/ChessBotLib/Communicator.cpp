@@ -1,20 +1,22 @@
 #include "Communicator.h"
 
-Communicator::Communicator()
-{
-} 
-
 /*
  ID_INDEX			0
  COMMAND_INDEX		1
  CHECKSUM_INDEX		7
  
- PACKET_SIZE			8
+ PACKET_SIZE		8
  
- CHECK_SUM			117
+ CHECK_SUM			0x75
  */
-void Communicator::GetMessage(byte botId)
-{		 		 				 
+
+Communicator::Communicator()
+{
+} 
+
+bool Communicator::GetMessage(byte botId)
+{		 
+    bool gotMessage = false;
 	int messageIndex = 0;
 	byte message[MESSAGE_SIZE] = {0};
 	memset(inboxMessageBuffer, 0, sizeof inboxMessageBuffer);
@@ -26,11 +28,15 @@ void Communicator::GetMessage(byte botId)
 		delay(3);
 	}
 	
-	if(CHECK_SUM == message[CHECKSUM_INDEX] && ((botId == message[ID_INDEX] || 255 == message[ID_INDEX])))
+	if(CHECK_SUM == message[CHECKSUM_INDEX] && ((botId == message[ID_INDEX] || 0xFF == message[ID_INDEX])))
 	{
 		for(int index = 0; index < 8; index++)
 			inboxMessageBuffer[(index)] = message[(index)];
+        
+        gotMessage = true;
 	}
+    
+    return gotMessage;
 }
 
 void Communicator::SendMessage(byte botId)
@@ -48,16 +54,11 @@ void Communicator::SendMessage(byte botId)
 bool Communicator::CheckForCommand(byte botId)
 {
 	bool commandIsValid = false;
-	bool commandIsRecieved = false;
 	unsigned long checkTime = 3000;
 	unsigned long startTime;
 	byte tempBuffer[8];
-    
-	GetMessage(botId);
-	if(inboxMessageBuffer[ID_INDEX] == botId)
-		commandIsRecieved = true;
 	
-	if(commandIsRecieved)
+	if(GetMessage(botId))
 	{
 		for(int index = 0; index < 8; index++)
 		{
@@ -65,23 +66,18 @@ bool Communicator::CheckForCommand(byte botId)
 			tempBuffer[index] = inboxMessageBuffer[index];
 		}
         
-        
 		SendMessage(botId);
         
 		startTime = millis();
-		while((millis() - startTime) < checkTime)
+		while(((millis() - startTime) < checkTime) && !commandIsValid)
 		{
-			GetMessage(botId);
-			if(inboxMessageBuffer[COMMAND_INDEX] == 0 && inboxMessageBuffer[ID_INDEX] == botId)
-			{
-				commandIsValid = true;
-			}
-		}
-		
-		if(commandIsValid)
-		{
-			for(int index = 0; index < 8; index++)
-				inboxMessageBuffer[(index)] = tempBuffer[(index)];
+			if(GetMessage(botId) && inboxMessageBuffer[COMMAND_INDEX] == 0)
+            {
+                for(int index = 0; index < 8; index++)
+                    inboxMessageBuffer[(index)] = tempBuffer[(index)];
+                
+                commandIsValid = true;
+            }
 		}
 	}
 	
