@@ -58,11 +58,12 @@ void ChessBot::CheckForNextMove()
 			else
 			{
 				for(int columnIndex = 0; columnIndex < sizeof xBee.inboxMessageBuffer; columnIndex++)
-					commandBuffer[commandRowIndex][columnIndex] = xBee.inboxMessageBuffer[(columnIndex)];
+					commandBuffer[commandRowIndex][columnIndex] = xBee.inboxMessageBuffer[columnIndex];
                 
 				commandRowIndex++;
 			}		
 		}
+        
 	}
 	
 	if(readyToExecute)
@@ -147,6 +148,10 @@ void ChessBot::ExecuteCommands()
 		}
 		commandRowIndex++;
 	}
+    
+    memset(commandBuffer, 0, sizeof commandBuffer);
+    
+    
 }
 
 int ChessBot::MeasureSquareState()
@@ -464,6 +469,7 @@ void ChessBot::CrossStraight(int numOfSquares, bool measureSquareDistance)
         crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, targetSpeed);
         leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
         rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
+        
     }
     
     targetSpeed = 0.4;
@@ -500,10 +506,10 @@ void ChessBot::Center(int firstEdge, int secondEdge)
     MoveDistance(-squareDistance/2);
 }
 
-void ChessBot::AlignToEdge()
+void ChessBot::AlignToEdge(float targetSpeed)
 {
     PIDController headingController = PIDController(10, 1.0/300.0, 1.0/6000.0, 7.0/30.0, 1.0/3.0, -1.0/3.0);
-    PIDController botAccelerator = PIDController(10, 0, 1, 0, 0.4, -0.4);
+    PIDController botAccelerator = PIDController(10, 0, 1, 0, targetSpeed, -targetSpeed);
     byte squareState = MeasureSquareState();
     
     gyro.Reinitialize();
@@ -513,7 +519,7 @@ void ChessBot::AlignToEdge()
         squareState = MeasureSquareState();
         gyro.UpdateAngles();
             
-        float crossingSpeed = botAccelerator.ComputeOutput(0, 1.0/100.0);
+        float crossingSpeed = botAccelerator.ComputeOutput(0, 0.01);
         leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
         rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
     }
@@ -536,9 +542,7 @@ void ChessBot::AlignToEdge()
 void ChessBot::MoveDistance(long numOfEncoderTicks, float targetSpeed)
 {
     PIDController headingController = PIDController(10, 1.0/300.0, 1.0/6000.0, 7.0/30.0, 1.0/3.0, -1.0/3.0);
-    PIDController botAccelerator = PIDController(10, 0, 0.01, 0, 1, -1);
-    
-    float crossingSpeed = 0;
+    PIDController botAccelerator = PIDController(10, 0, 1, 0, targetSpeed, -targetSpeed);
     
     gyro.Reinitialize();
 	
@@ -551,7 +555,7 @@ void ChessBot::MoveDistance(long numOfEncoderTicks, float targetSpeed)
         {
             gyro.UpdateAngles();
         
-            crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, targetSpeed);
+            float crossingSpeed = botAccelerator.ComputeOutput(0, 0.01);
             leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
             rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
         }
@@ -562,7 +566,7 @@ void ChessBot::MoveDistance(long numOfEncoderTicks, float targetSpeed)
         {
             gyro.UpdateAngles();
             
-            crossingSpeed = botAccelerator.ComputeOutput(crossingSpeed, -targetSpeed);
+            float crossingSpeed = botAccelerator.ComputeOutput(0, -0.01);
             leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
             rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), 0));
         }

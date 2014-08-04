@@ -31,7 +31,7 @@ bool Communicator::GetMessage(byte botId)
 	if(CHECK_SUM == message[CHECKSUM_INDEX] && ((botId == message[ID_INDEX] || 0xFF == message[ID_INDEX])))
 	{
 		for(int index = 0; index < 8; index++)
-			inboxMessageBuffer[(index)] = message[(index)];
+			inboxMessageBuffer[index] = message[index];
         
         gotMessage = true;
 	}
@@ -54,7 +54,7 @@ void Communicator::SendMessage(byte botId)
 bool Communicator::CheckForCommand(byte botId)
 {
 	bool commandIsValid = false;
-	unsigned long checkTime = 3000;
+	unsigned long checkTime = 10000;
 	unsigned long startTime;
 	byte tempBuffer[8];
 	
@@ -78,6 +78,7 @@ bool Communicator::CheckForCommand(byte botId)
                 
                 commandIsValid = true;
             }
+            delay(10);
 		}
 	}
 	

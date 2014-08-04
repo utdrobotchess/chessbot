@@ -7,6 +7,7 @@
 #include <PIDController.h>
 #include <Wheel.h>
 #include <EEPROM.h>
+#include <MemoryFree.h>
 
 #define robotIdEEPROMAddress 1
 #define DEFAULT_SQUARE_DISTANCE_IN_ENC_TICKS 2950
@@ -33,7 +34,7 @@ public:
     void CrossStraight(int numOfSquares, bool measureSquareDistance);
     
     void Center(int firstEdge, int secondEdge);
-    void AlignToEdge();
+    void AlignToEdge(float targetSpeed = 0.4);
     void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
     
     Communicator xBee;
