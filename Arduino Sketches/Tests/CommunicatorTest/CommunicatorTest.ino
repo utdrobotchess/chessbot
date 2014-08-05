@@ -1,13 +1,12 @@
 #include <Wire.h>
 #include <Communicator.h>
 Communicator xbee;
-byte botId = 1;
+byte botId = 29;
 
 void setup()
 { 
   Serial.begin(9600);
 }
-
 
 void loop() 
 {
@@ -31,9 +30,4 @@ void sendMessageTest()
     
   xbee.SendMessage(botId);
   delay(1000);
-}
-
-void CheckForCommandTest()
-{
-  xbee.CheckForCommand(botId);
 }

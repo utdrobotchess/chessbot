@@ -13,12 +13,13 @@ void setup()
 
 void loop()
 {
-  SquareMotionTest(7);
-  DiagonalTest(7);
-  //CheckForNextMoveTest();
+  //SquareMotionTest(7);
+  //DiagonalTest(7);
+  CheckForNextMoveTest();
   //MoveDistanceTest();
   //rotateTest();
   //CrossAlongEdgeTest(7);
+  //ReadRobotIDTest();
 }
 
 void rotateTest()
@@ -42,14 +43,14 @@ void SquareMotionTest(int crossNumberofSquares)
    Bot.CrossSquares(crossNumberofSquares);
    Bot.Rotate(90);
    Bot.CrossSquares(crossNumberofSquares);
-   Bot.Center(180,-90);
+   Bot.Center(4,-2);
 }
 
 void DiagonalTest(int crossNumberofSquares)
 {
   Bot.Rotate(45);
   Bot.CrossSquares(crossNumberofSquares);
-  Bot.Center(-135,-90);
+  Bot.Center(-3,-2);
 }
 
 void GyroTest()
@@ -61,6 +62,7 @@ void GyroTest()
 void CheckForNextMoveTest()
 {
   Bot.CheckForNextMove();
+  delay(10);
 }
 
 void ReadRobotIDTest()
@@ -92,6 +94,6 @@ void CrossAlongEdgeTest(int crossNumberOfSquares)
   Bot.CrossSquares(crossNumberOfSquares);
   Bot.Rotate(90);
   Bot.MoveDistance(700);
-  Bot.Center(0,90);
+  Bot.Center(0,2);
 }
 
