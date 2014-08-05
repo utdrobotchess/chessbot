@@ -19,10 +19,8 @@ public:
     bool GetMessage(byte botId);
     void SendMessage(byte botId);
     
-    bool CheckForCommand(byte botId);
-    
-    byte inboxMessageBuffer[8];
-    byte outboxMessageBuffer[8];
+    byte inboxMessageBuffer[MESSAGE_SIZE];
+    byte outboxMessageBuffer[MESSAGE_SIZE];
 };
 
 #endif

@@ -47,7 +47,7 @@ void ChessBot::CheckForNextMove()
 	
 	while(!readyToExecute && !bufferOverflow)
 	{
-		if(xBee.CheckForCommand(readBotId()))
+		if(xBee.GetMessage(readBotId()))
 		{
 			if(xBee.inboxMessageBuffer[1] == 0xFF)
 				readyToExecute = true;
