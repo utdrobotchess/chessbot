@@ -27,6 +27,7 @@ public:
     void Rotate(float endAngle);
     void Unwind();
     int  MeasureSquareState();
+    void RCMode();
     
     void CrossSquares(int numOfSquares, bool measureSquareDistance = true);
     void CrossDiagonal(int numOfSquares);
@@ -37,7 +38,7 @@ public:
     void AlignToEdge(float targetSpeed = 0.4);
     void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
     
-    Communicator xBee;
+    Communicator XBee;
     Wheel leftWheel;
     Wheel rightWheel;
     Gyroscope gyro;

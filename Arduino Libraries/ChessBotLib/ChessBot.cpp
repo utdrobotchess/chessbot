@@ -3,7 +3,7 @@
 ChessBot::ChessBot()
 {
     
-    xBee = Communicator();
+    XBee = Communicator();
     gyro = Gyroscope();
 		
     leftWheel = Wheel('L');
@@ -47,9 +47,9 @@ void ChessBot::CheckForNextMove()
 	
 	while(!readyToExecute && !bufferOverflow)
 	{
-		if(xBee.GetMessage(readBotId()))
+		if(XBee.GetMessage(readBotId()))
 		{
-			if(xBee.inboxMessageBuffer[1] == 0xFF)
+			if(XBee.inboxMessageBuffer[1] == 0xFF)
 				readyToExecute = true;
             
 			else if(commandRowIndex == 10)
@@ -57,8 +57,8 @@ void ChessBot::CheckForNextMove()
             
 			else
 			{
-				for(int columnIndex = 0; columnIndex < sizeof xBee.inboxMessageBuffer; columnIndex++)
-					commandBuffer[commandRowIndex][columnIndex] = xBee.inboxMessageBuffer[columnIndex];
+				for(int columnIndex = 0; columnIndex < sizeof XBee.inboxMessageBuffer; columnIndex++)
+					commandBuffer[commandRowIndex][columnIndex] = XBee.inboxMessageBuffer[columnIndex];
                 
 				commandRowIndex++;
 			}		
@@ -117,11 +117,11 @@ void ChessBot::ExecuteCommands()
                 break;
                 
             case 0x5:
-                xBee.outboxMessageBuffer[0] = readBotId();
-                xBee.outboxMessageBuffer[1] = 0x5; 
-                xBee.outboxMessageBuffer[2] = MeasureSquareState();
-                xBee.outboxMessageBuffer[7] = 0x75;
-                xBee.SendMessage(readBotId());
+                XBee.outboxMessageBuffer[0] = readBotId();
+                XBee.outboxMessageBuffer[1] = 0x5; 
+                XBee.outboxMessageBuffer[2] = MeasureSquareState();
+                XBee.outboxMessageBuffer[7] = 0x75;
+                XBee.SendMessage(readBotId());
                 break;
                 
             case 0x6:
@@ -573,4 +573,49 @@ void ChessBot::MoveDistance(long numOfEncoderTicks, float targetSpeed)
     }
 	
 	HardStop();
+}
+
+void ChessBot::RCMode()
+{
+    bool endControllerMode = false;
+    float leftWheelVelocity;
+    float rightWheelVelocity;
+    enum TurnDirection
+    {
+        LEFT = 1,
+        RIGHT = -1
+    } turnDirection;
+    
+    enum VelocityDirection
+    {
+        FORWARD = 1,
+        REVERSE = -1
+    } velocityDirection;
+    
+    while(!endControllerMode)
+    {
+        if(XBee.GetMessage(readBotId()))
+        {
+            if(XBee.inboxMessageBuffer[1] == 0)
+                velocityDirection = REVERSE;
+            else
+                velocityDirection = FORWARD;
+            
+            if(XBee.inboxMessageBuffer[3] == 0)
+                turnDirection = RIGHT;
+            else
+                turnDirection = LEFT;
+            
+            leftWheelVelocity = (float)(velocityDirection*XBee.inboxMessageBuffer[2] - turnDirection*XBee.inboxMessageBuffer[4])/(float)(112.5);
+            rightWheelVelocity = (float)(velocityDirection*XBee.inboxMessageBuffer[2] + turnDirection*XBee.inboxMessageBuffer[4])/(float)(112.5);
+            
+            if(XBee.inboxMessageBuffer[6] == 0xFF && XBee.inboxMessageBuffer[5] == 0xFF)
+                endControllerMode = true;
+        }
+        
+        leftWheel.ControlAngularVelocity(leftWheelVelocity);
+        rightWheel.ControlAngularVelocity(rightWheelVelocity);
+    }
+    
+    HardStop();
 }
