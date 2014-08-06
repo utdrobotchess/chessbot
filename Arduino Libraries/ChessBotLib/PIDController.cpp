@@ -71,7 +71,6 @@ void PIDController::SetSamplingPeriod(int newSamplePeriod)
 
 void PIDController::SetOutputLimits(double MAXOUTPUT, double MINOUTPUT)
 {
-    
     maxOutput = MAXOUTPUT;
     minOutput = MINOUTPUT;
 }
