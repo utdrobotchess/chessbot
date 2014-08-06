@@ -24,7 +24,7 @@ void ChessBot::Setup()
     pinMode(12, OUTPUT);
     digitalWrite(12, HIGH);
     
-    Serial.begin(9600);
+    Serial.begin(57600);
     
     gyro.Init();
 }
@@ -578,8 +578,9 @@ void ChessBot::MoveDistance(long numOfEncoderTicks, float targetSpeed)
 void ChessBot::RCMode()
 {
     bool endControllerMode = false;
-    float leftWheelVelocity;
-    float rightWheelVelocity;
+    float leftWheelVelocity = 0;
+    float rightWheelVelocity = 0;
+    
     enum TurnDirection
     {
         LEFT = 1,
@@ -606,15 +607,16 @@ void ChessBot::RCMode()
             else
                 turnDirection = LEFT;
             
-            leftWheelVelocity = (float)(velocityDirection*XBee.inboxMessageBuffer[2] - turnDirection*XBee.inboxMessageBuffer[4])/(float)(112.5);
-            rightWheelVelocity = (float)(velocityDirection*XBee.inboxMessageBuffer[2] + turnDirection*XBee.inboxMessageBuffer[4])/(float)(112.5);
+            leftWheelVelocity = (float)(velocityDirection*XBee.inboxMessageBuffer[2] - turnDirection*XBee.inboxMessageBuffer[4])/(float)(127.5);
+            rightWheelVelocity = (float)(velocityDirection*XBee.inboxMessageBuffer[2] + turnDirection*XBee.inboxMessageBuffer[4])/(float)(127.5);
             
             if(XBee.inboxMessageBuffer[6] == 0xFF && XBee.inboxMessageBuffer[5] == 0xFF)
                 endControllerMode = true;
         }
-        
         leftWheel.ControlAngularVelocity(leftWheelVelocity);
         rightWheel.ControlAngularVelocity(rightWheelVelocity);
+        delay(10);//Need to fix the ControlAngularVelocity() function within Wheel Class. It should only update samples every 10ms. Once
+                  //that is fixed, (probably by using state estimation), then this delay can (and should be) removed. 
     }
     
     HardStop();
