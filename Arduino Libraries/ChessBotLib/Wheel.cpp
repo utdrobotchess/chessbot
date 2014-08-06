@@ -29,7 +29,7 @@ Wheel::Wheel(char whichWheel)
     previousEncoderTickCount = 0;
     timeOfLastUpdate = micros();
     
-    angularVelocityController = PIDController(1, 18.0, 15.0, 10.0, 255.0, -255.0);
+    angularVelocityController = PIDController(5, 18.0, 15.0, 10.0, 255.0, -255.0);
     
 	if(whichWheel == 'L')
 	{
@@ -135,9 +135,7 @@ float Wheel::MeasureAngularVelocity()
 
 void Wheel::ControlAngularVelocity(float angularVelocitySetpoint)
 {
-    float angularVelocity = MeasureAngularVelocity();
-    int PWM = (int)angularVelocityController.ComputeOutput(angularVelocity, angularVelocitySetpoint);
-    Rotate(PWM);
+    Rotate((int)angularVelocityController.ComputeOutput(MeasureAngularVelocity(), angularVelocitySetpoint));
 }
 
 void Wheel::ResetAngularVelocityController()
