@@ -3,6 +3,7 @@
 
 #include <Communicator.h>
 #include <Gyroscope.h>
+#include <Locator.h>
 #include <Photodiode.h>
 #include <PIDController.h>
 #include <Wheel.h>
@@ -39,13 +40,14 @@ public:
     void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
     
     Communicator XBee;
-    Wheel leftWheel;
-    Wheel rightWheel;
+    Locator locator;
     Gyroscope gyro;
     Photodiode backRightPhotoDiode;
     Photodiode backLeftPhotoDiode;
     Photodiode frontRightPhotoDiode;
     Photodiode frontLeftPhotoDiode;
+    Wheel leftWheel;
+    Wheel rightWheel;
     
 private:
     

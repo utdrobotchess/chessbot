@@ -4,6 +4,7 @@ ChessBot::ChessBot()
 {
     
     XBee = Communicator();
+    locator = Locator(EEPROM.read(robotIdEEPROMAddress));
     gyro = Gyroscope();
 		
     leftWheel = Wheel('L');
@@ -51,24 +52,19 @@ void ChessBot::CheckForNextMove()
 		{
 			if(XBee.inboxMessageBuffer[1] == 0xFF)
 				readyToExecute = true;
-            
 			else if(commandRowIndex == 10)
 				bufferOverflow = true;
-            
 			else
 			{
 				for(int columnIndex = 0; columnIndex < sizeof XBee.inboxMessageBuffer; columnIndex++)
 					commandBuffer[commandRowIndex][columnIndex] = XBee.inboxMessageBuffer[columnIndex];
-                
 				commandRowIndex++;
 			}		
 		}
-        
 	}
 	
 	if(readyToExecute)
 		ExecuteCommands();
-    
 	else if(bufferOverflow)
 		memset(commandBuffer, 0, sizeof commandBuffer);
 }
@@ -84,18 +80,16 @@ void ChessBot::ExecuteCommands()
 			case 0x1:
 				CrossSquares(commandBuffer[commandRowIndex][2]);
 				break;
-				
 			case 0x2:
             {
                 float endAngle = (commandBuffer[commandRowIndex][3] << 8) | commandBuffer[commandRowIndex][4];
                 
                 if(commandBuffer[commandRowIndex][2] == 0x2D)
-                    endAngle *= -1;
+                    endAngle *= -1; 
                 
                 Rotate(endAngle);
 				break;
-            }
-				
+            }	
 			case 0x3:
             {
                 int firstEdge = commandBuffer[commandRowIndex][3];
@@ -108,30 +102,24 @@ void ChessBot::ExecuteCommands()
                     secondEdge *= -1;
                 
                 Center(firstEdge, secondEdge);
-                
 				break;
-            }
-				
+            }	
             case 0x4:
                 writeBotId(commandBuffer[commandRowIndex][2]);
                 break;
-                
             case 0x5:
                 XBee.outboxMessageBuffer[0] = readBotId();
                 XBee.outboxMessageBuffer[1] = 0x5; 
                 XBee.outboxMessageBuffer[2] = MeasureSquareState();
                 XBee.outboxMessageBuffer[7] = 0x75;
                 XBee.SendMessage(readBotId());
-                break;
-                
+                break; 
             case 0x6:
                 Unwind();
                 break;
-                
             case 0x7:
                 AlignToEdge();
                 break;
-                
             case 0x8:
             {
                 long numOfEncoderTicks = (commandBuffer[commandRowIndex][3] << 24) | (commandBuffer[commandRowIndex][4] << 16) |
@@ -142,16 +130,21 @@ void ChessBot::ExecuteCommands()
                 
                 MoveDistance(numOfEncoderTicks);
             }
-                
+            case 0x9:
+            {
+                double angle = locator.ComputeNextAngle(commandBuffer[commandRowIndex][2],commandBuffer[commandRowIndex][3],angleState);
+                Rotate(angle);
+                CrossSquares(locator.GetTravelDistance(commandBuffer[commandRowIndex][2],commandBuffer[commandRowIndex][3]));
+                locator.UpdateCurrentLocation(commandBuffer[commandRowIndex][2],commandBuffer[commandRowIndex][3]);
+                break;
+            }
 			default:
 				break;
 		}
 		commandRowIndex++;
 	}
-    
+    //Center(-90,90);
     memset(commandBuffer, 0, sizeof commandBuffer);
-    
-    
 }
 
 int ChessBot::MeasureSquareState()
@@ -314,9 +307,7 @@ void ChessBot::CrossDiagonal(int numOfSquares)
         leftWheel.ControlAngularVelocity(crossingSpeed - headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
         rightWheel.ControlAngularVelocity(crossingSpeed + headingController.ComputeOutput(gyro.ReturnZAngle(), adjustAngle));
     }
-    
     HardStop();
-    
 }
 
 void ChessBot::CrossAlongEdge(int numOfSquares)
@@ -352,7 +343,6 @@ void ChessBot::CrossAlongEdge(int numOfSquares)
                 adjustAngle = adjustAngleIntegrator.ComputeOutput(0,-1.5);
                 break;
                 
-                
             default:
                 if(numOfSquares - numOfCrossings < 3)
                 {
@@ -360,8 +350,6 @@ void ChessBot::CrossAlongEdge(int numOfSquares)
                     if(numOfSquares - numOfCrossings == 1)
                         targetSpeed = 0.5;
                 }
-                
-
                 
                 if((startingSquare == 0x6 && squareState == 0x9) || (startingSquare == 0x9 && squareState == 0x6))
                 {
