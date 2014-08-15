@@ -1,9 +1,9 @@
 #ifndef ChessBot_h
 #define ChessBot_h
 
-#include <Communicator.h>
-#include <Gyroscope.h>
+#include <XBee.h>
 #include <Locator.h>
+#include <Gyroscope.h>
 #include <Photodiode.h>
 #include <PIDController.h>
 #include <Wheel.h>
@@ -13,6 +13,7 @@
 #define robotIdEEPROMAddress 1
 #define DEFAULT_SQUARE_DISTANCE_IN_ENC_TICKS 2950
 #define ROBOT_DIAMETER_IN_METERS 0.26
+#define MAXIMUM_COMMAND_BUFFER_SIZE 20
 
 class ChessBot
 {
@@ -39,19 +40,24 @@ public:
     void AlignToEdge(float targetSpeed = 0.4);
     void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
     
-    Communicator XBee;
-    Locator locator;
+    XBee xbee;
+    XBeeAddress64 coordinatorAddr64;
+    ZBRxResponse rx;
+
+    Wheel leftWheel;
+    Wheel rightWheel;
+
     Gyroscope gyro;
+
+    Locator locator;
+
     Photodiode backRightPhotoDiode;
     Photodiode backLeftPhotoDiode;
     Photodiode frontRightPhotoDiode;
     Photodiode frontLeftPhotoDiode;
-    Wheel leftWheel;
-    Wheel rightWheel;
     
 private:
-    
-    byte commandBuffer[10][8];
+    byte commandBuffer[MAXIMUM_COMMAND_BUFFER_SIZE][8];
     double angleState;
     long squareDistance;
     
