@@ -3,22 +3,18 @@
 
 #include <arduino.h>
 
-
 class Locator
 {
 	public:
 		Locator();
 		Locator(byte botId);
-		int GetCurrentXLocation();
-		int GetCurrentYLocation();
+		int GetCurrentLocation();
 		int GetTravelDistance(int desiredX, int desiredY);
-		void UpdateCurrentLocation(int currentX,int currentY);
+		void UpdateLocation(int currentX,int currentY);
 		double ComputeNextAngle(int desiredX,int desiredY,double currentAngle);
 
-	private:
 		int x;
 		int y;
-
 };
 #endif
 
