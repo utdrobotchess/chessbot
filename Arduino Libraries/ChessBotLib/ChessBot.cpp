@@ -139,6 +139,8 @@ void ChessBot::ExecuteCommands()
 				xbee.send(tx);
 				break;
 			}
+            case 0xB:
+                RCMode();  
 
 			default:
 				break;
