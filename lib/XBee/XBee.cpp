@@ -1,26 +1,15 @@
-#include <XBee.h>
+#include "XBee.h"
 
 XBee::XBee(): _response(XBeeResponse()) 
 {
-        _pos = 0;
-        _escape = false;
-        _checksumTotal = 0;
-        _nextFrameId = 0;
+    _pos = 0;
+    _escape = false;
+    _checksumTotal = 0;
+    _nextFrameId = 0;
 
-        _response.init();
-        _response.setFrameData(_responseFrameData);
-		// Contributed by Paul Stoffregen for Teensy support
-#if defined(__AVR_ATmega32U4__) || defined(__MK20DX128__)
-        _serial = &Serial1;
-#else
-        _serial = &Serial;
-#endif
-}
-
-// Support for SoftwareSerial. Contributed by Paul Stoffregen
-void XBee::begin(Stream &serial) 
-{
-	_serial = &serial;
+    _response.init();
+    _response.setFrameData(_responseFrameData);
+    _serial = &Serial;
 }
 
 void XBee::setSerial(Stream &serial) 
@@ -53,7 +42,6 @@ void XBee::readPacket()
 			} 
 			else 
 			{
-				// escape byte.  next byte will be
 				_escape = true;
 				continue;
 			}
@@ -110,8 +98,6 @@ void XBee::readPacket()
 				{
 					// verify checksum
 
-					//std::cout << "read checksum " << static_cast<unsigned int>(lastByteRead) << " at pos " << static_cast<unsigned int>(_pos) << std::endl;
-
 					if ((_checksumTotal & 0xff) == 0xff) 
 					{
 						_response.setChecksum(lastByteRead);
@@ -159,16 +145,13 @@ bool XBee::readPacket(int timeout)
      		return false;
     }
 
-    // timed out
     return false;
 }
 
 void XBee::readPacketUntilAvailable() 
 {
-	while (!(getResponse().isAvailable() || getResponse().isError())) // read some more
-	{
+	while (!(getResponse().isAvailable() || getResponse().isError()))
 		readPacket();
-	}
 }
 
 void XBee::getResponse(XBeeResponse &response) 
@@ -178,7 +161,6 @@ void XBee::getResponse(XBeeResponse &response)
 	response.setLsbLength(_response.getLsbLength());
 	response.setApiId(_response.getApiId());
 	response.setFrameLength(_response.getFrameDataLength());
-
 	response.setFrameData(_response.getFrameData());
 }
 
@@ -205,8 +187,8 @@ void XBee::send(XBeeRequest &request)
 	uint8_t checksum = 0;
 
 	// compute checksum, start at api id
-	checksum+= request.getApiId();
-	checksum+= request.getFrameId();
+	checksum += request.getApiId();
+	checksum += request.getFrameId();
 
 	for (int i = 0; i < request.getFrameDataLength(); i++) 
 	{

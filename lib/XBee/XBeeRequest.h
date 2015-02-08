@@ -2,9 +2,9 @@
 #define XBEE_REQUEST_H
 
 #include <Arduino.h>
-#include <XbeeAddress.h>
+#include "XbeeAddress64.h"
 
-#define DEFAULT_FRAME_ID 1
+#define DEFAULT_FRAME_ID 0
 
 #define AT_COMMAND_API_LENGTH 2
 #define ZB_TX_API_LENGTH 12
@@ -16,8 +16,6 @@
 #define ZB_BROADCAST_RADIUS_MAX_HOPS 0
 
 #define ZB_TX_REQUEST 0x10
-#define REMOTE_AT_REQUEST 0x17
-#define AT_COMMAND_REQUEST 0x08
 
 /*-----------------------------------------------------------------------------------------
   Super class of all XBee requests (TX packets)
@@ -27,15 +25,17 @@
 class XBeeRequest
 {
 public:
-	XBeeRequest(uint8_t apiId, uint8_t frameId);
+	XBeeRequest(uint8_t apiId, uint8_t frameId)
+        { _apiId = apiId; _frameId = frameId; }
 
-	/*
-	  Sets the frame id.  Must be between 1 and 255 inclusive to get a TX status response.
-	 */
-	void setFrameId(uint8_t frameId);
+	void setFrameId(uint8_t frameId) // 1 < frameId < 255 to recieve a TX status response
+        { _frameId = frameId; }
 
-	uint8_t getFrameId();
-	uint8_t getApiId();
+	uint8_t getFrameId()
+        { return _frameId; }
+
+	uint8_t getApiId()
+        { return _apiId; }
 
 	/*
 	  Starting after the frame id (pos = 0) and up to but not including the checksum
@@ -51,7 +51,8 @@ public:
 	virtual uint8_t getFrameDataLength() = 0;
 
 protected:
-	void setApiId(uint8_t apiId);
+	void setApiId(uint8_t apiId)
+        { _apiId = apiId; }
 
 private:
 	uint8_t _apiId;
@@ -63,29 +64,25 @@ private:
 class PayloadRequest : public XBeeRequest
 {
 public:
-	PayloadRequest(uint8_t apiId, uint8_t frameId, uint8_t *payload, uint8_t payloadLength);
+	PayloadRequest(uint8_t apiId, uint8_t frameId, uint8_t *payload, uint8_t payloadLength) : XBeeRequest(apiId, frameId)
+        { _payloadPtr = payload; _payloadLength = payloadLength; }
 
-	/*
-	  Returns the payload of the packet, if not null
-	 */
-	uint8_t* getPayload();
+	uint8_t* getPayload()
+        { return _payloadPtr; }
 
-	/*
-	  Sets the payload array
-	 */
-	void setPayload(uint8_t* payloadPtr);
+	void setPayload(uint8_t* payloadPtr)
+        { _payloadPtr = payloadPtr; }
 
-	/*
-	  Returns the length of the payload array, as specified by the user.
-	 */
-	uint8_t getPayloadLength();
+	uint8_t getPayloadLength()
+        { return _payloadLength; }
 
 	/*
 	  Sets the length of the payload to include in the request.  For example if the payload array
 	  is 50 bytes and you only want the first 10 to be included in the packet, set the length to 10.
 	  Length must be <= to the array length.
 	 */
-	void setPayloadLength(uint8_t payloadLength);
+	void setPayloadLength(uint8_t payloadLength)
+        { _payloadLength = payloadLength; }
 
 private:
 	uint8_t* _payloadPtr;
@@ -111,119 +108,96 @@ public:
 	  Creates a default instance of this class.  At a minimum you must specify
 	  a payload, payload length and a destination address before sending this request.
 	 */
-	ZBTxRequest();
+	ZBTxRequest() : PayloadRequest(ZB_TX_REQUEST, DEFAULT_FRAME_ID, NULL, 0){}
 
 	/*
 	  Creates a unicast ZBTxRequest with the ACK option and DEFAULT_FRAME_ID
 	 */
-	ZBTxRequest(XBeeAddress64 &addr64, uint8_t *payload, uint8_t payloadLength);
+	ZBTxRequest(XBeeAddress64 &addr64, uint8_t *payload, uint8_t payloadLength) : PayloadRequest(ZB_TX_REQUEST, DEFAULT_FRAME_ID, payload, payloadLength) 
+        { _addr64 = addr64; _addr16 = ZB_BROADCAST_ADDRESS; _broadcastRadius = ZB_BROADCAST_RADIUS_MAX_HOPS; _option = ZB_TX_UNICAST; }
 
-	ZBTxRequest(XBeeAddress64 &addr64, uint16_t addr16, uint8_t broadcastRadius, uint8_t option, uint8_t *payload, uint8_t payloadLength, uint8_t frameId);
-	
-	XBeeAddress64& getAddress64();
-	void setAddress64(XBeeAddress64& addr64);
+	ZBTxRequest(XBeeAddress64 &addr64, uint16_t addr16, uint8_t broadcastRadius, uint8_t option, uint8_t *payload, uint8_t payloadLength, uint8_t frameId) : PayloadRequest(ZB_TX_REQUEST, frameId, payload, payloadLength) 
+        { _addr64 = addr64; _addr16 = addr16; _broadcastRadius = broadcastRadius; _option = option; }
 
-	uint16_t getAddress16();
-	void setAddress16(uint16_t addr16);
+	XBeeAddress64& getAddress64()
+        { return _addr64; }
 
-	uint8_t getBroadcastRadius();
-	void setBroadcastRadius(uint8_t broadcastRadius);
+	void setAddress64(XBeeAddress64& addr64)
+        { _addr64 = addr64; }
 
-	uint8_t getOption();
-	void setOption(uint8_t option);
+	uint16_t getAddress16()
+        { return _addr16; }
+
+	void setAddress16(uint16_t addr16)
+        { _addr16 = addr16; }
+
+	uint8_t getBroadcastRadius()
+        { return _broadcastRadius; }
+
+	void setBroadcastRadius(uint8_t broadcastRadius)
+        { _broadcastRadius = broadcastRadius; }
+
+	uint8_t getOption()
+        { return _option; }
+
+	void setOption(uint8_t option)
+        { _option = option; }
 
 protected:
-	uint8_t getFrameData(uint8_t pos);
-	uint8_t getFrameDataLength();
+	uint8_t getFrameData(uint8_t pos)
+    {
+        switch(pos)
+        {
+            case 0:
+                return (_addr64.getMsb() >> 24) & 0xff;
+                break;
+            case 1:
+                return (_addr64.getMsb() >> 16) & 0xff;
+                break;
+            case 2:
+                return (_addr64.getMsb() >> 8) & 0xff;
+                break;
+            case 3:
+                return _addr64.getMsb() & 0xff;
+                break;
+            case 4:
+                return (_addr64.getLsb() >> 24) & 0xff;
+                break;
+            case 5:
+                return (_addr64.getLsb() >> 16) & 0xff;
+                break;
+            case 6:
+                return (_addr64.getLsb() >> 8) & 0xff;
+                break;
+            case 7:
+                return _addr64.getLsb() & 0xff;
+                break;
+            case 8:
+                return (_addr16 >> 8) & 0xff;
+                break;
+            case 9:
+                return _addr16 & 0xff;
+                break;
+            case 10:
+                return _broadcastRadius;
+                break;
+            case 11:
+                return _option;
+                break;
+            default:
+                return getPayload()[pos - ZB_TX_API_LENGTH];
+                break;
+        }
+    }
+
+	uint8_t getFrameDataLength()
+        { return ZB_TX_API_LENGTH + getPayloadLength(); }
 
 private:
 	XBeeAddress64 _addr64;
 	uint16_t _addr16;
 	uint8_t _broadcastRadius;
 	uint8_t _option;
-};
-
-/*-----------------------------------------------------------------------------------------
-  Represents an AT Command TX packet
-  The command is used to configure the serially connected XBee radio
- -----------------------------------------------------------------------------------------*/
-class AtCommandRequest : public XBeeRequest
-{
-public:
-	AtCommandRequest();
-	AtCommandRequest(uint8_t *command);
-	AtCommandRequest(uint8_t *command, uint8_t *commandValue, uint8_t commandValueLength);
-
-	uint8_t getFrameData(uint8_t pos);
-	uint8_t getFrameDataLength();
-
-	uint8_t* getCommand();
-	void setCommand(uint8_t* command);
-
-	uint8_t* getCommandValue();
-	void setCommandValue(uint8_t* command);
-	void clearCommandValue(); // Clears the optional commandValue and commandValueLength so that a query may be sent
-
-	uint8_t getCommandValueLength();
-	void setCommandValueLength(uint8_t length);
-	
-private:
-	uint8_t *_command;
-	uint8_t *_commandValue;
-	uint8_t _commandValueLength;
-};
-
-/*-----------------------------------------------------------------------------------------
-  Represents a Remote AT Command TX packet
-  The command is used to configure a remote XBee radio
- -----------------------------------------------------------------------------------------*/
-class RemoteAtCommandRequest : public AtCommandRequest
-{
-public:
-	RemoteAtCommandRequest();
-
-	/*
-	  Creates a RemoteAtCommandRequest with 16-bit address to set a command.
-	  64-bit address defaults to broadcast and applyChanges is true.
-	 */
-	RemoteAtCommandRequest(uint16_t remoteAddress16, uint8_t *command, uint8_t *commandValue, uint8_t commandValueLength);
-
-	/*
-	  Creates a RemoteAtCommandRequest with 16-bit address to query a command.
-	  64-bit address defaults to broadcast and applyChanges is true.
-	 */
-	RemoteAtCommandRequest(uint16_t remoteAddress16, uint8_t *command);
-
-	/*
-	  Creates a RemoteAtCommandRequest with 64-bit address to set a command.
-	  16-bit address defaults to broadcast and applyChanges is true.
-	 */
-	RemoteAtCommandRequest(XBeeAddress64 &remoteAddress64, uint8_t *command, uint8_t *commandValue, uint8_t commandValueLength);
-
-	/*
-	  Creates a RemoteAtCommandRequest with 16-bit address to query a command.
-	  16-bit address defaults to broadcast and applyChanges is true.
-	 */
-	RemoteAtCommandRequest(XBeeAddress64 &remoteAddress64, uint8_t *command);
-
-	uint16_t getRemoteAddress16();
-	void setRemoteAddress16(uint16_t remoteAddress16);
-
-	XBeeAddress64& getRemoteAddress64();
-	void setRemoteAddress64(XBeeAddress64 &remoteAddress64);
-
-	bool getApplyChanges();
-	void setApplyChanges(bool applyChanges);
-
-	uint8_t getFrameData(uint8_t pos);
-	uint8_t getFrameDataLength();
-
-	static XBeeAddress64 broadcastAddress64;
-
-private:
-	XBeeAddress64 _remoteAddress64;
-	uint16_t _remoteAddress16;
-	bool _applyChanges;
 };
 
 #endif //XBEE_REQUEST_H

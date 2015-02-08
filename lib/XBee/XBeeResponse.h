@@ -2,7 +2,7 @@
 #define XBEE_RESPONSE_H
 
 #include <Arduino.h>
-#include <XbeeAddress.h>
+#include "XbeeAddress64.h"
 
 #define AT_OK 0
 #define	SUCCESS 0x0
@@ -13,43 +13,69 @@
 class XBeeResponse
 {
 public:
-	XBeeResponse();
-	void init();
-	void reset();
+	XBeeResponse(){}
+
+	void init()
+        { _complete = false; _errorCode = NO_ERROR; _checksum = 0; }
+
+	void reset()
+        { init(); _apiId = 0; _msbLength = 0; _lsbLength = 0; _checksum = 0; _frameLength = 0; _errorCode = NO_ERROR; }
 
 	/*
 	  Returns true if the response has been successfully parsed and is complete and ready for use
 	 */
-	bool isAvailable();
-	void setAvailable(bool complete);
+	bool isAvailable()
+        { return _complete; }
 
-	bool isError();
+	void setAvailable(bool complete)
+        { _complete = complete; }
+
+	bool isError()
+        { return _errorCode > 0; }
 
 	/*
 	  Returns an error code, or zero, if successful.
 	  Error codes include: CHECKSUM_FAILURE, PACKET_EXCEEDS_BYTE_ARRAY_LENGTH, UNEXPECTED_START_BYTE
 	 */
-	uint8_t getErrorCode();
-	void setErrorCode(uint8_t errorCode);
+	uint8_t getErrorCode()
+        { return _errorCode; }
 
-	uint8_t getApiId();
-	void setApiId(uint8_t apiId);
+	void setErrorCode(uint8_t errorCode)
+        { _errorCode = errorCode; }
 
-	uint8_t getMsbLength();
-	void setMsbLength(uint8_t msbLength);
+	uint8_t getApiId()
+        { return _apiId; }
 
-	uint8_t getLsbLength();
-	void setLsbLength(uint8_t lsbLength);
+	void setApiId(uint8_t apiId)
+        { _apiId = apiId; }
 
-	uint8_t getChecksum();
-	void setChecksum(uint8_t checksum);
+	uint8_t getMsbLength()
+        { return _msbLength; }
+
+	void setMsbLength(uint8_t msbLength)
+        { _msbLength = msbLength; }
+
+	uint8_t getLsbLength()
+        { return _lsbLength; }
+    
+	void setLsbLength(uint8_t lsbLength)
+        { _lsbLength = lsbLength; }
+
+	uint8_t getChecksum()
+        { return _checksum; }
+
+	void setChecksum(uint8_t checksum)
+        { _checksum = checksum; }
 
 	/*
 	  Returns the length of the frame data: all bytes after the api id, and prior to the checksum
 	  Note up to release 0.1.2, this was incorrectly including the checksum in the length.
 	 */
-	uint8_t getFrameDataLength();
-	void setFrameLength(uint8_t frameLength);
+	uint8_t getFrameDataLength()
+        { return _frameLength; }
+
+	void setFrameLength(uint8_t frameLength)
+        { _frameLength = frameLength; }
 
 	/*
 	  Returns the buffer that contains the response.
@@ -59,10 +85,14 @@ public:
 	  The reason for this is all responses include an API ID, whereas my frame data
 	  includes only the API specific data.
 	 */
-	uint8_t* getFrameData();
-	void setFrameData(uint8_t* frameDataPtr);
+	uint8_t* getFrameData()
+        { return _frameDataPtr; }
 
-	uint16_t getPacketLength();
+	void setFrameData(uint8_t* frameDataPtr)
+        { _frameDataPtr = frameDataPtr; }
+
+	uint16_t getPacketLength()
+        { return ((_msbLength << 8) & 0xff) + (_lsbLength & 0xff); }
 
 	/*
 	  Call with instance of ZBTxStatusResponse class only if getApiId() == ZB_TX_STATUS_RESPONSE
@@ -116,8 +146,9 @@ private:
 class ModemStatusResponse : public XBeeResponse
 {
 public:
-	ModemStatusResponse();
-	uint8_t getStatus();
+	ModemStatusResponse(){}
+	uint8_t getStatus()
+        { return getFrameData()[0]; }
 };
 
 /*-----------------------------------------------------------------------------------------
@@ -125,18 +156,20 @@ public:
 class RxDataResponse : public XBeeResponse
 {
 public:
-	RxDataResponse();
+	RxDataResponse(){}
 
 	/*
 	  Returns the specified index of the payload.  The index may be 0 to getDataLength() - 1
 	  This method is deprecated; use uint8_t* getData()
 	 */
-	uint8_t getData(int index);
+	uint8_t getData(int index)
+	    { return getFrameData()[getDataOffset() + index]; }
 
 	/*
 	  Returns the payload array.  This may be accessed from index 0 to getDataLength() - 1
 	 */
-	uint8_t* getData();
+	uint8_t* getData()
+	    { return getFrameData() + getDataOffset(); }
 
 	/*
 	  Returns the length of the payload
@@ -154,12 +187,23 @@ public:
 class ZBRxResponse : public RxDataResponse
 {
 public:
-	ZBRxResponse();
-	XBeeAddress64& getRemoteAddress64();
-	uint16_t getRemoteAddress16();
-	uint8_t getOption();
-	uint8_t getDataLength();
-	uint8_t getDataOffset();
+	ZBRxResponse() : RxDataResponse() 
+        { _remoteAddress64 = XBeeAddress64(); }
+
+	XBeeAddress64& getRemoteAddress64()
+        { return _remoteAddress64; }
+    
+	uint16_t getRemoteAddress16()
+	    { return 	(getFrameData()[8] << 8) + getFrameData()[9]; }
+
+	uint8_t getOption()
+	    { return getFrameData()[10]; }
+
+	uint8_t getDataLength()
+	    { return getPacketLength() - getDataOffset() - 1; }
+
+	uint8_t getDataOffset()
+	    { return 11; }
 
 private:
 	XBeeAddress64 _remoteAddress64;
@@ -167,31 +211,12 @@ private:
 
 /*-----------------------------------------------------------------------------------------
  -----------------------------------------------------------------------------------------*/
-class ZBRxIoSampleResponse : public ZBRxResponse
-{
-public:
-	ZBRxIoSampleResponse();
-	bool containsAnalog();
-	bool containsDigital();
-
-	bool isAnalogEnabled(uint8_t pin);
-	bool isDigitalEnabled(uint8_t pin);
-	bool isDigitalOn(uint8_t pin);
-
-	uint16_t getAnalog(uint8_t pin);
-
-	uint8_t getAnalogMask();
-	uint8_t getDigitalMaskMsb();
-	uint8_t getDigitalMaskLsb();
-};
-
-/*-----------------------------------------------------------------------------------------
- -----------------------------------------------------------------------------------------*/
 class FrameIdResponse : public XBeeResponse
 {
 public:
-	FrameIdResponse();
-	uint8_t getFrameId();
+	FrameIdResponse(){}
+	uint8_t getFrameId()
+	    { return getFrameData()[0]; }
 
 private:
 	uint8_t _frameId;
@@ -202,43 +227,22 @@ private:
 class ZBTxStatusResponse : public FrameIdResponse
 {
 public:
-    ZBTxStatusResponse();
-    uint16_t getRemoteAddress();
-    uint8_t getTxRetryCount();
-    uint8_t getDeliveryStatus();
-    uint8_t getDiscoveryStatus();
-    bool isSuccess();
-};
+    ZBTxStatusResponse(){}
+    
+    uint16_t getRemoteAddress()
+	    { return  (getFrameData()[1] << 8) + getFrameData()[2]; }
 
-/*-----------------------------------------------------------------------------------------
- -----------------------------------------------------------------------------------------*/
-class AtCommandResponse : public FrameIdResponse
-{
-public:
-    AtCommandResponse();
-    uint8_t* getCommand();
-    uint8_t getStatus();
-    uint8_t* getValue();
-    uint8_t getValueLength();
-    bool isOk();
-};
+    uint8_t getTxRetryCount()
+        { return getFrameData()[3]; }
 
-/*-----------------------------------------------------------------------------------------
- -----------------------------------------------------------------------------------------*/
-class RemoteAtCommandResponse : public AtCommandResponse
-{
-public:
-    RemoteAtCommandResponse();
-    uint8_t* getCommand();
-    uint8_t getStatus();
-    uint8_t* getValue();
-    uint8_t getValueLength();
-    uint16_t getRemoteAddress16();
-    XBeeAddress64& getRemoteAddress64();
-    bool isOk();
+    uint8_t getDeliveryStatus()
+        { return getFrameData()[4]; }
 
-private:
-    XBeeAddress64 _remoteAddress64;
+    uint8_t getDiscoveryStatus()
+	    { return getFrameData()[5]; }
+
+    bool isSuccess()
+	    { return getDeliveryStatus() == SUCCESS; }
 };
 
 #endif
