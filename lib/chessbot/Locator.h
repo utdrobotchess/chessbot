@@ -1,7 +1,7 @@
 #ifndef LOCATOR_H
 #define LOCATOR_H
 
-#include <arduino.h>
+#include <Arduino.h>
 
 class Locator
 {

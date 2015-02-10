@@ -1,6 +1,6 @@
 #include <Wire.h>
-#include <EEPROM.h>
-#include <ChessBot.h>
+#include "EEPROM.h"
+#include "ChessBot.h"
 
 ChessBot Bot;
 
