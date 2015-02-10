@@ -1,4 +1,4 @@
-#include <ChessBot.h>
+#include "ChessBot.h"
 
 ChessBot::ChessBot()
 {	
@@ -63,8 +63,9 @@ void ChessBot::CheckForNextMove()
 			
 			else
 			{
+                                uint8_t* _rx = rx.getData();
 				for(int columnIndex = 0; columnIndex < rx.getDataLength(); columnIndex++)
-					commandBuffer[commandRowIndex][columnIndex] = rx.getData(columnIndex);
+					commandBuffer[commandRowIndex][columnIndex] = _rx[columnIndex];
 				
 				commandRowIndex++;
 			}		
@@ -129,7 +130,7 @@ void ChessBot::ExecuteCommands()
 			case 0x9:
 				Rotate(locator.ComputeNextAngle(commandBuffer[commandRowIndex][1],commandBuffer[commandRowIndex][2],angleState));
 				CrossSquares(locator.GetTravelDistance(commandBuffer[commandRowIndex][1],commandBuffer[commandRowIndex][2]));
-				locator.UpdateCurrentLocation(commandBuffer[commandRowIndex][1],commandBuffer[commandRowIndex][2]);
+				locator.UpdateLocation(commandBuffer[commandRowIndex][1],commandBuffer[commandRowIndex][2]);
 				break;
 
 			case 0xA:

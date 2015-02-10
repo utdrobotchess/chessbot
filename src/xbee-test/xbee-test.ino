@@ -1,33 +1,30 @@
-#include <XBee.h>
-#include <EEPROM.h>
+#include <Arduino.h>
+#include "XBee.h"
 
 XBee xbee = XBee();
-uint8_t payload[] = {0,0,0,0};
+uint8_t payload[] = {0,0};
 
-// SH + SL Address of receiving XBee
 XBeeAddress64 addr64 = XBeeAddress64(0x00000000, 0x00000000);
 ZBTxRequest Tx = ZBTxRequest(addr64, payload, sizeof(payload));
-
-XBeeResponse response = XBeeResponse();
-// create reusable response objects for responses we expect to handle
 ZBRxResponse rx = ZBRxResponse();
-ModemStatusResponse msr = ModemStatusResponse();
 
 void setup() 
 {
-  Serial.begin(9600);
+  Serial.begin(57600);
   xbee.setSerial(Serial);
+  
+  //TXTest();
 }
 
 void loop() 
 {   
-  GetPayloadSizeTest();
+  RXTest();
+  delay(10);
 }
 
 void TXTest()
 {
   xbee.send(Tx);
-  delay(1000);
 }
 
 void RXTest()
@@ -37,24 +34,13 @@ void RXTest()
   if (xbee.getResponse().isAvailable() && xbee.getResponse().getApiId() == ZB_RX_RESPONSE) 
   {
     xbee.getResponse().getZBRxResponse(rx);
-    for(int i = 0; i <= sizeof(payload); i++)
-      payload[i] = rx.getData(i);
+    uint8_t* payload2 = rx.getData();
+    //for(int i = 0; i <= sizeof(payload); i++)
+      //payload[i] = rx.getData(i);
       
-    Tx = ZBTxRequest(addr64, payload, sizeof(payload));
-    xbee.send(Tx);
-  } 
-}
-
-void GetPayloadSizeTest()
-{
-  xbee.readPacket();
-    
-  if (xbee.getResponse().isAvailable() && xbee.getResponse().getApiId() == ZB_RX_RESPONSE) 
-  {
-    xbee.getResponse().getZBRxResponse(rx);
-    //payload[1] = rx.getDataLength();
-      
-    //Tx = ZBTxRequest(addr64, payload, sizeof(payload));
+    //Tx.setPayloadLength(sizeof(payload2));
+    //Tx.setPayload(payload2);
+    Tx = ZBTxRequest(addr64, payload2, sizeof(payload2));
     xbee.send(Tx);
   } 
 }

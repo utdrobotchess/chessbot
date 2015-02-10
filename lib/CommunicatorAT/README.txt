@@ -1,1 +1,0 @@
-﻿The CommunicatorAT class has been deprecated. It was originally used to handle messages between AT mode routers. The library ‘XBee.h/XBee.cpp’ is used instead for API mode. 

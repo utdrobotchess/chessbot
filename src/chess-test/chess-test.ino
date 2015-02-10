@@ -9,13 +9,14 @@ void setup()
   Bot.Setup();
   attachInterrupt(Bot.leftWheel.ReturnEncoderInterruptPinRef(), LeftHandleEncoderPinAInterrupt, RISING);  
   attachInterrupt(Bot.rightWheel.ReturnEncoderInterruptPinRef(), RightHandleEncoderPinAInterrupt, RISING);
+  Bot.RCMode();
 }
 
 void loop()
 {
-  //SquareMotionTest(7);
-  //DiagonalTest(7);
-  CheckForNextMoveTest();
+  //SquareMotionTest(4);
+  //DiagonalTest(4);
+  //CheckForNextMoveTest();
   //MoveDistanceTest();
   //rotateTest();
   //CrossAlongEdgeTest(7);

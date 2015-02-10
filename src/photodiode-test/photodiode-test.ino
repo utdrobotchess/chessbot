@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include <Wire.h>
 #include <Photodiode.h>
 
@@ -8,7 +9,7 @@ Photodiode BL_Diode ("BL");
 
 void setup()
 { 
-  Serial.begin(9600);
+  Serial.begin(57600);
   //Power on the IR LEDS
   pinMode(12, OUTPUT);
   digitalWrite(12,HIGH); 
@@ -29,5 +30,5 @@ void lightMeasurementTest()
   Serial.print(BR_Diode.GetAnalogLightMeasurement());
   Serial.print(".");
   Serial.println(BL_Diode.GetAnalogLightMeasurement());
-  delay(10);
+  delay(1000);
 }
