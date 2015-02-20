@@ -5,16 +5,15 @@
 
 class Locator
 {
-	public:
-		Locator();
-		Locator(byte botId);
-		int GetCurrentLocation();
-		int GetTravelDistance(int desiredX, int desiredY);
-		void UpdateLocation(int currentX,int currentY);
-		double ComputeNextAngle(int desiredX,int desiredY,double currentAngle);
+public:
+    Locator();
+    Locator(byte botId);
+    int GetCurrentLocation();
+    int GetTravelDistance(int endSquare);
+    void UpdateLocation(int _boardPosition);
+    double ComputeNextAngle(int endSquare, double currentAngle);
 
-		int x;
-		int y;
+    int boardPosition;
 };
 #endif
 

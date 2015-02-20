@@ -63,7 +63,7 @@ void ChessBot::CheckForNextMove()
 			
 			else
 			{
-                                uint8_t* _rx = rx.getData();
+                uint8_t* _rx = rx.getData();
 				for(int columnIndex = 0; columnIndex < rx.getDataLength(); columnIndex++)
 					commandBuffer[commandRowIndex][columnIndex] = _rx[columnIndex];
 				
@@ -93,7 +93,12 @@ void ChessBot::ExecuteCommands()
 				break;
 				
 			case 0x2:
-				Rotate((int16_t) ( (commandBuffer[commandRowIndex][1] << 8) | commandBuffer[commandRowIndex][2] ) );
+                int degrees = commandBuffer[commandRowIndex[0] * 45]; 
+
+                if(degrees > 180)
+                    degrees = degrees - 360;
+
+				Rotate(degrees);
 				break;
 				
 			case 0x3:   
@@ -128,9 +133,9 @@ void ChessBot::ExecuteCommands()
 				break;
 
 			case 0x9:
-				Rotate(locator.ComputeNextAngle(commandBuffer[commandRowIndex][1],commandBuffer[commandRowIndex][2],angleState));
-				CrossSquares(locator.GetTravelDistance(commandBuffer[commandRowIndex][1],commandBuffer[commandRowIndex][2]));
-				locator.UpdateLocation(commandBuffer[commandRowIndex][1],commandBuffer[commandRowIndex][2]);
+				Rotate(locator.ComputeNextAngle(commandBuffer[commandRowIndex][1], angleState));
+				CrossSquares(locator.GetTravelDistance(commandBuffer[commandRowIndex][1]));
+				locator.UpdateLocation(commandBuffer[commandRowIndex][1]);
 				break;
 
 			case 0xA:
@@ -142,6 +147,19 @@ void ChessBot::ExecuteCommands()
 			}
             case 0xB:
                 RCMode();  
+                break;
+
+            case 0xC:
+                locator.UpdateLocation(commandBuffer[commandRowIndex][1]);
+                break;
+
+            case 0xD:
+            {
+                uint8_t message[] = { locator.getLocation(GetCurrentLocation) };
+                ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
+                xbee.send(tx);
+                break;
+            }
 
 			default:
 				break;
@@ -495,9 +513,15 @@ void ChessBot::Center(int firstEdge, int secondEdge)
 	if(!(squareState == 0x0 || squareState == 0xF))
 		return;
 	
-	float firstRotation = firstEdge*45;
-	float secondRotation = secondEdge*45;
-	
+	float firstRotation = firstEdge * 45;
+	float secondRotation = secondEdge * 45;
+
+    if(degrees > 180)
+        firstRotation = firstRotation - 360;
+
+    if(degrees > 180)
+        secondRotation = secondRotation - 360;
+
 	Rotate(firstRotation);
 	AlignToEdge();
 	MoveDistance(-squareDistance/2);
