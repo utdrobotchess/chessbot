@@ -93,14 +93,15 @@ void ChessBot::ExecuteCommands()
 				break;
 				
 			case 0x2:
-                int degrees = commandBuffer[commandRowIndex[0] * 45]; 
+            {
+                int degrees = (commandBuffer[commandRowIndex][0] * 45); 
 
                 if(degrees > 180)
                     degrees = degrees - 360;
 
 				Rotate(degrees);
 				break;
-				
+            }
 			case 0x3:   
 				Center((int8_t)commandBuffer[commandRowIndex][1], (int8_t)commandBuffer[commandRowIndex][2]);
 				break;
@@ -155,7 +156,7 @@ void ChessBot::ExecuteCommands()
 
             case 0xD:
             {
-                uint8_t message[] = { locator.getLocation(GetCurrentLocation) };
+                uint8_t message[] = { locator.GetCurrentLocation() };
                 ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
                 xbee.send(tx);
                 break;
@@ -516,10 +517,10 @@ void ChessBot::Center(int firstEdge, int secondEdge)
 	float firstRotation = firstEdge * 45;
 	float secondRotation = secondEdge * 45;
 
-    if(degrees > 180)
+    if(firstRotation > 180)
         firstRotation = firstRotation - 360;
 
-    if(degrees > 180)
+    if(secondRotation > 180)
         secondRotation = secondRotation - 360;
 
 	Rotate(firstRotation);

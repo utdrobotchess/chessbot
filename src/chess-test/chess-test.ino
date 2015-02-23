@@ -25,14 +25,13 @@ void loop()
 
 void rotateTest()
 {
-  int sign = 1;
+    int sign = 1;
     for (int i = 1; i < 5; i++)
     {
       sign = sign * -1;
       Bot.Rotate(i*45*sign);
       delay(100);
     }
-    
 }
 
 void SquareMotionTest(int crossNumberofSquares)
