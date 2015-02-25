@@ -55,10 +55,11 @@ public:
     Photodiode backLeftPhotoDiode;
     Photodiode frontRightPhotoDiode;
     Photodiode frontLeftPhotoDiode;
+
+    double angleState;
     
 private:
     byte commandBuffer[MAXIMUM_COMMAND_BUFFER_SIZE][8];
-    double angleState;
     long squareDistance;
     
 };

@@ -222,7 +222,6 @@ void ChessBot::HardStop()
 void ChessBot::Rotate(float endAngle)
 {
 	PIDController headingController = PIDController(10, 0.003, 1.0/7000.0, 0.01, 2, -2);
-	
 	unsigned long fineTunePeriod = 200;
 	unsigned long startTuneTime  = 0;
 	unsigned long timeElapsed    = 0;

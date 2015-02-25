@@ -28,7 +28,7 @@ int Locator::GetTravelDistance(int endSquare)
 		return abs(endX - startX);
 
 	else
-		return abs(endX - startX);
+		return abs(endY - startY);
 }
 
 void Locator::UpdateLocation(int _boardPosition)
@@ -44,26 +44,34 @@ double Locator::ComputeNextAngle(int endSquare, double currentAngle)
     int endX = endSquare % 8;
     int endY = endSquare / 8;
 
+    float nextAngle = 0;
+
 	if((endX - startX) == 0 && (endY - startY) > 0)
-		return -currentAngle;
+		nextAngle =  -currentAngle;
 	else if((endX - startX) == 0 && (endY - startY) < 0)
-		return -currentAngle + 180;
+		nextAngle =  -currentAngle + 180;
 
 	else if((endX - startX) > 0 && (endY - startY) == 0)
-		return -currentAngle + 90;
+		nextAngle =  -currentAngle + 90;
 	else if((endX - startX) < 0 && (endY - startY) == 0)
-		return -currentAngle - 90;
+		nextAngle =  -currentAngle - 90;
 
 	else if((endX - startX) > 0 && (endY - startY) > 0)
-		return -currentAngle + 45;
+		nextAngle =  -currentAngle + 45;
 	else if((endX - startX) < 0 && (endY - startY) > 0)
-		return -currentAngle - 45;
+		nextAngle =  -currentAngle - 45;
 
 	else if((endX - startX) > 0 && (endY - startY) < 0)
-		return -currentAngle + 135;
+		nextAngle =  -currentAngle + 135;
 	else if((endX - startX) < 0 && (endY - startY) < 0)
-		return -currentAngle - 135;
+		nextAngle =  -currentAngle - 135;
 
-	else
-		return 0;
+    if(nextAngle > 180)
+        nextAngle = nextAngle - 360;
+
+    if(nextAngle < -180)
+        nextAngle = nextAngle + 360;
+
+
+    return nextAngle;
 }

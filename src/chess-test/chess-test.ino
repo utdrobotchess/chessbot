@@ -10,7 +10,6 @@ void setup()
   Bot.Setup();
   attachInterrupt(Bot.leftWheel.ReturnEncoderInterruptPinRef(), LeftHandleEncoderPinAInterrupt, RISING);  
   attachInterrupt(Bot.rightWheel.ReturnEncoderInterruptPinRef(), RightHandleEncoderPinAInterrupt, RISING);
-  
   //Bot.RCMode();
 }
 
