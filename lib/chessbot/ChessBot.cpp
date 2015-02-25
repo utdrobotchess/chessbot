@@ -83,6 +83,9 @@ void ChessBot::CheckForNextMove()
 void ChessBot::ExecuteCommands()
 {
 	uint8_t commandRowIndex = 0;
+    uint8_t messageRowIndex = 0;
+    bool finishedMovement = false;
+    ZBTxRequest messageBuffer[10]; 
 	
 	while(commandRowIndex < MAXIMUM_COMMAND_BUFFER_SIZE)
 	{
@@ -113,8 +116,9 @@ void ChessBot::ExecuteCommands()
 			case 0x5:
 			{
 				uint8_t message[] = { 0x5, MeasureSquareState() };
-				ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
-				xbee.send(tx);
+                ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
+                messageBuffer[messageRowIndex] = tx;
+                messageRowIndex++;
 				break;
 			}
 				
@@ -134,23 +138,19 @@ void ChessBot::ExecuteCommands()
 				break;
 
 			case 0x9:
-            {
-				uint8_t message[] = {0x9};
-
 				Rotate(locator.ComputeNextAngle(commandBuffer[commandRowIndex][1], angleState));
 				CrossSquares(locator.GetTravelDistance(commandBuffer[commandRowIndex][1]));
 				locator.UpdateLocation(commandBuffer[commandRowIndex][1]);
-
-				ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
-				xbee.send(tx);
+                
+                finishedMovement = true;
 				break;
-            }
 
 			case 0xA:
 			{
 				uint8_t message[] = { 0xA, readBotId() };
-				ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
-				xbee.send(tx);
+                ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
+                messageBuffer[messageRowIndex] = tx;
+                messageRowIndex++;
 				break;
 			}
             case 0xB:
@@ -165,7 +165,8 @@ void ChessBot::ExecuteCommands()
             {
                 uint8_t message[] = { 0xD, locator.GetCurrentLocation() };
                 ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
-                xbee.send(tx);
+                messageBuffer[messageRowIndex] = tx;
+                messageRowIndex++;
                 break;
             }
 
@@ -174,6 +175,19 @@ void ChessBot::ExecuteCommands()
 		}
 		commandRowIndex++;
 	}
+
+    if(finishedMovement)
+    {
+        uint8_t message[] = { 0x9 };
+        ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, message, sizeof(message));
+        messageBuffer[messageRowIndex] = tx;
+        messageRowIndex++;
+    }
+
+    for(int i = 0; i < messageRowIndex; i++)
+    {
+        xbee.send(messageBuffer[i]);
+    }
 	
 	memset(commandBuffer, 0, sizeof commandBuffer);
 	

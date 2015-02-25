@@ -1,6 +1,4 @@
-#include <EEPROM.h>
-#include <Wire.h>
-#include <Photodiode.h>
+#include "Photodiode.h"
 
 Photodiode FR_Diode ("FR");
 Photodiode FL_Diode ("FL");

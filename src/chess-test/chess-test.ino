@@ -2,6 +2,7 @@
 #include "EEPROM.h"
 #include "ChessBot.h"
 
+long start = millis();
 ChessBot Bot;
 
 void setup()
@@ -9,6 +10,7 @@ void setup()
   Bot.Setup();
   attachInterrupt(Bot.leftWheel.ReturnEncoderInterruptPinRef(), LeftHandleEncoderPinAInterrupt, RISING);  
   attachInterrupt(Bot.rightWheel.ReturnEncoderInterruptPinRef(), RightHandleEncoderPinAInterrupt, RISING);
+  
   //Bot.RCMode();
 }
 
