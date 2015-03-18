@@ -1,0 +1,13 @@
+TODO
+
+1)  Find out the cause of the lag for RCCommand()
+
+2)  Slowly clean up libs (ie: Combine .h and .cpp and see what difference is
+    made in performance)
+
+3)  Move everything from lib to src and remove lib. Modify the libs from
+    chess-test dir and use update to move libs to other dirs
+
+4)  Add threading
+
+5)  Simplify and speed up certain movements (AlignToEdge(), Center(), etc...)

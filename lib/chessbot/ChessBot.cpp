@@ -69,7 +69,8 @@ void ChessBot::ExecuteCommand()
             break;
 
         case 4:
-            RCCommand();
+            if(payloadSize > 4)
+                RCCommand(payload[1], payload[2], payload[3], payload[4]);
             break;
 
         case 5:
@@ -119,15 +120,8 @@ void ChessBot::MoveToCommand(uint8_t squareLocation)
         SmartCenter();
 }
 
-void ChessBot::RCCommand()
+void ChessBot::RCCommand(uint8_t velDir, uint8_t vel, uint8_t turnDir, uint8_t turnVel)
 {
-    uint8_t payloadSize = rx.getDataLength();
-    uint8_t payload[payloadSize - 1];
-
-    for(uint8_t i = 1; i < payloadSize; i++)
-        payload[i - 1] = rx.getData(i);
-
-
 	float leftWheelVelocity = 0;
 	float rightWheelVelocity = 0;
 
@@ -143,23 +137,21 @@ void ChessBot::RCCommand()
 		REVERSE = -1
 	} velocityDirection;
 
-    if(payload[0] == 0)
+    if(velDir == 0)
         velocityDirection = REVERSE;
     else
         velocityDirection = FORWARD;
 
-    if(payload[2] == 0)
+    if(turnDir == 0)
         turnDirection = RIGHT;
     else
         turnDirection = LEFT;
 
-    leftWheelVelocity = (velocityDirection * (float)payload[1] - turnDirection * (float)payload[3]) / 127.5;
-    rightWheelVelocity = (velocityDirection * (float)payload[1] + turnDirection * (float)payload[3]) / 127.5;
+    leftWheelVelocity = (velocityDirection * (float)vel - turnDirection * (float)turnVel);
+    rightWheelVelocity = (velocityDirection * (float)vel + turnDirection * (float)turnVel);
 
-    leftWheel.ControlAngularVelocity(leftWheelVelocity);
-    rightWheel.ControlAngularVelocity(rightWheelVelocity);
-
-    delay(10);//Need to fix the ControlAngularVelocity() function within Wheel Class.
+    leftWheel.Rotate(leftWheelVelocity);
+    rightWheel.Rotate(rightWheelVelocity);
 }
 
 void ChessBot::SendBotLocationCommand()
@@ -538,7 +530,7 @@ void ChessBot::SmartCenter()
 
     if(id < 16)
     {
-        if(squareLocation > 56) 
+        if(squareLocation > 56)
             Center(4, 2);
 
         else if(squareLocation == 56)
@@ -552,7 +544,7 @@ void ChessBot::SmartCenter()
     }
     else
     {
-        if(squareLocation > 7) 
+        if(squareLocation > 7)
             Center(4, 2);
 
         else if(squareLocation == 7)

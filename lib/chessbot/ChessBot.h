@@ -8,7 +8,6 @@
 #include "PIDController.h"
 #include "Wheel.h"
 #include "EEPROM.h"
-#include "MemoryFree.h"
 
 #define robotIdEEPROMAddress 1
 #define DEFAULT_SQUARE_DISTANCE_IN_ENC_TICKS 2950
@@ -20,12 +19,12 @@ class ChessBot
 public:
     ChessBot();
     void Setup();
-    
+
     void CheckForNextCommand();
     void ExecuteCommand();
     void SendBotIDCommand();
     void MoveToCommand(uint8_t squareLocation);
-    void RCCommand();
+    void RCCommand(uint8_t, uint8_t, uint8_t, uint8_t);
     void SendBotLocationCommand();
 
     uint8_t readBotId();
@@ -34,17 +33,17 @@ public:
     void Rotate(float endAngle);
     void Unwind();
     int  MeasureSquareState();
-    
+
     void CrossSquares(int numOfSquares, bool measureSquareDistance = true);
     void CrossDiagonal(int numOfSquares);
     void CrossAlongEdge(int numOfSquares);
     void CrossStraight(int numOfSquares, bool measureSquareDistance);
-    
+
     void Center(int firstEdge, int secondEdge);
     void SmartCenter();
     void AlignToEdge(float targetSpeed = 0.4);
     void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
-    
+
     XBee xbee;
     XBeeAddress64 coordinatorAddr64;
     ZBRxResponse rx;
@@ -62,10 +61,10 @@ public:
     Photodiode frontLeftPhotoDiode;
 
     double angleState;
-    
+
 private:
     long squareDistance;
-    
+
 };
 
 #endif
