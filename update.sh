@@ -1,2 +1,4 @@
-cp ./lib/*/*.cpp ./lib/*/*.h ./src/chess-test/
-cp ./lib/chessbot/Photodiode.cpp ./lib/chessbot/Photodiode.h ./src/photodiode-test/
+cp ./src/chess-test/XB* ./src/test/xbee-test/
+cp ./src/chess-test/Wheel.* ./src/chess-test/PIDController.* ./src/chess-test/digitalWriteFast.h ./src/test/wheel-test/
+cp ./src/chess-test/Gyroscope.* ./src/test/gyroscope-test/
+cp ./src/chess-test/Photodiode.* ./src/test/photodiode-test/

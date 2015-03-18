@@ -1,5 +1,5 @@
 #include <Wire.h>
-#include <Gyroscope.h>
+#include "Gyroscope.h"
 
 Gyroscope gyro;
 float Angles[3];
