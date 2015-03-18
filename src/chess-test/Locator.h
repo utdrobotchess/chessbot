@@ -6,14 +6,79 @@
 class Locator
 {
 public:
-    Locator();
-    Locator(byte botId);
-    int GetCurrentLocation();
-    int GetTravelDistance(int endSquare);
-    void UpdateLocation(int _boardPosition);
-    double ComputeNextAngle(int endSquare, double currentAngle);
+    Locator(){}
+    Locator(uint8_t botId)
+    {
+        if(botId < 16)
+            boardPosition = botId;
 
-    int boardPosition;
+        else if(botId < 32 && botId > 15)
+            boardPosition = 32 + botId;
+    }
+
+    uint8_t GetCurrentLocation()
+    { return boardPosition; }
+
+    int GetTravelDistance(int endSquare)
+    {
+        int startX = boardPosition % 8;
+        int startY = boardPosition / 8;
+
+        int endX = endSquare % 8;
+        int endY = endSquare / 8;
+
+        if(abs(endX - startX) >= abs(endY - startY))
+            return abs(endX - startX);
+
+        else
+            return abs(endY - startY);
+    }
+
+    void UpdateLocation(int _boardPosition)
+    { boardPosition = _boardPosition; }
+
+    float ComputeNextAngle(int endSquare, double currentAngle)
+    {
+        uint8_t startX = boardPosition % 8;
+        uint8_t startY = boardPosition / 8;
+
+        uint8_t endX = endSquare % 8;
+        uint8_t endY = endSquare / 8;
+
+        float nextAngle = 0;
+
+        if((endX - startX) == 0 && (endY - startY) > 0)
+            nextAngle =  -currentAngle;
+        else if((endX - startX) == 0 && (endY - startY) < 0)
+            nextAngle =  -currentAngle + 180;
+
+        else if((endX - startX) > 0 && (endY - startY) == 0)
+            nextAngle =  -currentAngle + 90;
+        else if((endX - startX) < 0 && (endY - startY) == 0)
+            nextAngle =  -currentAngle - 90;
+
+        else if((endX - startX) > 0 && (endY - startY) > 0)
+            nextAngle =  -currentAngle + 45;
+        else if((endX - startX) < 0 && (endY - startY) > 0)
+            nextAngle =  -currentAngle - 45;
+
+        else if((endX - startX) > 0 && (endY - startY) < 0)
+            nextAngle =  -currentAngle + 135;
+        else if((endX - startX) < 0 && (endY - startY) < 0)
+            nextAngle =  -currentAngle - 135;
+
+        if(nextAngle > 180)
+            nextAngle = nextAngle - 360;
+
+        if(nextAngle < -180)
+            nextAngle = nextAngle + 360;
+
+
+        return nextAngle;
+    }
+
+private:
+    uint8_t boardPosition;
 };
 #endif
 
