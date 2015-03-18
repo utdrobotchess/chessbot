@@ -21,15 +21,19 @@ public:
     ChessBot();
     void Setup();
     
-    void CheckForNextMove();
-    void ExecuteCommands();
-    byte readBotId();
-    void writeBotId(byte Id);
+    void CheckForNextCommand();
+    void ExecuteCommand();
+    void SendBotIDCommand();
+    void MoveToCommand(uint8_t squareLocation);
+    void RCCommand();
+    void SendBotLocationCommand();
+
+    uint8_t readBotId();
+    void writeBotId(uint8_t Id);
     void HardStop();
     void Rotate(float endAngle);
     void Unwind();
     int  MeasureSquareState();
-    void RCMode();
     
     void CrossSquares(int numOfSquares, bool measureSquareDistance = true);
     void CrossDiagonal(int numOfSquares);
@@ -37,6 +41,7 @@ public:
     void CrossStraight(int numOfSquares, bool measureSquareDistance);
     
     void Center(int firstEdge, int secondEdge);
+    void SmartCenter();
     void AlignToEdge(float targetSpeed = 0.4);
     void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
     
@@ -59,7 +64,6 @@ public:
     double angleState;
     
 private:
-    byte commandBuffer[MAXIMUM_COMMAND_BUFFER_SIZE][8];
     long squareDistance;
     
 };
