@@ -80,6 +80,10 @@ void ChessBot::ExecuteCommand()
             SendBotLocationCommand();
             break;
 
+        case 7:
+            SmartCenter();
+            break;
+
         default:
         {
             ZBTxRequest tx = ZBTxRequest(coordinatorAddr64, payload, payloadSize);
