@@ -10,8 +10,8 @@ ChessBot::ChessBot()
 
 	gyro = Gyroscope();
 
-	leftWheel = Wheel('L');
-	rightWheel = Wheel('R');
+	leftWheel = LeftWheel();
+	rightWheel = RightWheel();
 
 	backRightPhotoDiode	 =  BRPhotodiode();
 	backLeftPhotoDiode 	 =  BLPhotodiode();

@@ -48,8 +48,8 @@ public:
     XBeeAddress64 coordinatorAddr64;
     ZBRxResponse rx;
 
-    Wheel leftWheel;
-    Wheel rightWheel;
+    LeftWheel leftWheel;
+    RightWheel rightWheel;
 
     Gyroscope gyro;
 
