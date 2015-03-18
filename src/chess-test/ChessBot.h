@@ -55,10 +55,10 @@ public:
 
     Locator locator;
 
-    Photodiode backRightPhotoDiode;
-    Photodiode backLeftPhotoDiode;
-    Photodiode frontRightPhotoDiode;
-    Photodiode frontLeftPhotoDiode;
+    BRPhotodiode backRightPhotoDiode;
+    BLPhotodiode backLeftPhotoDiode;
+    FRPhotodiode frontRightPhotoDiode;
+    FLPhotodiode frontLeftPhotoDiode;
 
     double angleState;
 

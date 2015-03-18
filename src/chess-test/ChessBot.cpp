@@ -13,10 +13,10 @@ ChessBot::ChessBot()
 	leftWheel = Wheel('L');
 	rightWheel = Wheel('R');
 
-	backRightPhotoDiode	 =  Photodiode("BR");
-	backLeftPhotoDiode 	 =  Photodiode("BL");
-	frontRightPhotoDiode =  Photodiode("FR");
-	frontLeftPhotoDiode  =  Photodiode("FL");
+	backRightPhotoDiode	 =  BRPhotodiode();
+	backLeftPhotoDiode 	 =  BLPhotodiode();
+	frontLeftPhotoDiode  =  FLPhotodiode();
+	frontRightPhotoDiode =  FRPhotodiode();
 
 	angleState = 0;
 	squareDistance = DEFAULT_SQUARE_DISTANCE_IN_ENC_TICKS;
