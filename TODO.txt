@@ -3,9 +3,6 @@ TODO
 1)  Slowly clean up libs (ie: Combine .h and .cpp and see what difference is
     made in performance)
 
-2)  Move everything from lib to src and remove lib. Modify the libs from
-    chess-test dir and use update to move libs to other dirs
+2)  Add threading
 
-3)  Add threading
-
-4)  Simplify and speed up certain movements (AlignToEdge(), Center(), etc...)
+3)  Simplify and speed up certain movements (AlignToEdge(), Center(), etc...)
