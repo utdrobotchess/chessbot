@@ -5,3 +5,4 @@ TODO
 
 2)  Add threading
     http://playground.arduino.cc/code/timer1
+    https://github.com/jlamothe/mthread
