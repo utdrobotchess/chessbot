@@ -4,5 +4,4 @@ TODO
     made in performance)
 
 2)  Add threading
-
-3)  Simplify and speed up certain movements (AlignToEdge(), Center(), etc...)
+    http://playground.arduino.cc/code/timer1
