@@ -72,6 +72,9 @@ public:
 
     void Rotate(int PWM)
     {
+        if(currentPWM == PWM)
+            return;
+
         if(PWM > 255)
             PWM = 255;
         else if(PWM < -255)
