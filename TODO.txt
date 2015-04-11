@@ -1,8 +1,0 @@
-TODO
-
-1)  Slowly clean up libs (ie: Combine .h and .cpp and see what difference is
-    made in performance)
-
-2)  Add threading
-    http://playground.arduino.cc/code/timer1
-    https://github.com/jlamothe/mthread
