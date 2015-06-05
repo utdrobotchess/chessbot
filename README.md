@@ -42,15 +42,22 @@ files require them. Thus, a simple shell script, update.sh, was written to copy 
 libraries from src/chess-test/ to src/test/[]-test/ directories. To clean these
 duplicated files, use the clean.sh.
 
-TODO
+Issues
 --------
-We track TODO's using the github issue tracker. If you feel that something is
+We track issues using the github issue tracker. If you feel that something is
 missing or broken, please visit our issues site: (https://github.com/utdrobotchess/chessbot/issues).
 Reading the open issues here may help you understand why something isn't
 working the way you expect it to.
 
 
-Debugging Chessbots
---------
+Documentation
+-------------
+The documentation for our project will be stored in manual.tex within doc/ of
+this repo. Those who are familiar with LaTeX and have it installed can either
+compile it however they know how, or run 'make manual' within this directory.
+
+Those unfamiliar with LaTeX may want to visit this site (http://latex-project.org)
+and learn more about it. For this project, it is enough to install LaTeX, cd
+into doc/ and run 'make manual'
 
 
