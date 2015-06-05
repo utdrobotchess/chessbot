@@ -12,8 +12,7 @@ In the following README, we assume the user knows how to use the Arduino IDE to
 compile and upload .ino files to Arduino-based MCU's.
 
 For more information about the UTDallas Robotchess project, visit our website
-(site currently unavailable, but URL will be http://www.utdallas.edu/robotchess
-and we will update this README as soon as the site is up).
+at http://www.utdallas.edu/robotchess.
 
 Contents
 --------
