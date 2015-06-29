@@ -1,6 +1,7 @@
 #include <Wire.h>
 #include "EEPROM.h"
 #include "ChessBot.h"
+#include "Streaming.h"
 
 ChessBot Bot;
 
@@ -13,13 +14,13 @@ void setup()
 
 void loop()
 {
-    //SquareMotionTest(3);
-    //DiagonalTest(4);
+    /* SquareMotionTest(3); */
+    /* DiagonalTest(4); */
     CheckForNextMoveTest();
-    //MoveDistanceTest();
-    //rotateTest();
-    //CrossAlongEdgeTest(7);
-    //ReadRobotIDTest();
+    /* MoveDistanceTest(); */
+    /* rotateTest(); */
+    /* CrossAlongEdgeTest(7); */
+    /* ReadRobotIDTest(); */
 }
 
 void rotateTest()

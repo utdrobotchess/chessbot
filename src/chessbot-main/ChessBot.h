@@ -8,6 +8,7 @@
 #include "PIDController.h"
 #include "Wheel.h"
 #include "EEPROM.h"
+#include "Streaming.h"
 
 #define robotIdEEPROMAddress 1
 #define DEFAULT_SQUARE_DISTANCE_IN_ENC_TICKS 2950
