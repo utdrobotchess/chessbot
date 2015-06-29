@@ -16,54 +16,54 @@
 
 class ChessBot
 {
-public:
-    ChessBot();
-    void Setup();
+    public:
+        ChessBot();
+        void Setup();
 
-    void CheckForNextCommand();
-    void ExecuteCommand();
-    void SendBotIDCommand();
-    void MoveToCommand(uint8_t squareLocation);
-    void RCCommand(uint8_t, uint8_t, uint8_t, uint8_t);
-    void SendBotLocationCommand();
+        void CheckForNextCommand();
+        void ExecuteCommand();
+        void SendBotIDCommand();
+        void MoveToCommand(uint8_t squareLocation);
+        void RCCommand(uint8_t, uint8_t, uint8_t, uint8_t);
+        void SendBotLocationCommand();
 
-    uint8_t readBotId();
-    void writeBotId(uint8_t Id);
-    void HardStop();
-    void Rotate(float endAngle);
-    void Unwind();
-    int  MeasureSquareState();
+        uint8_t readBotId();
+        void writeBotId(uint8_t Id);
+        void HardStop();
+        void Rotate(float endAngle);
+        void Unwind();
+        int  MeasureSquareState();
 
-    void CrossSquares(int numOfSquares, bool measureSquareDistance = true);
-    void CrossDiagonal(int numOfSquares);
-    void CrossAlongEdge(int numOfSquares);
-    void CrossStraight(int numOfSquares, bool measureSquareDistance);
+        void CrossSquares(int numOfSquares, bool measureSquareDistance = true);
+        void CrossDiagonal(int numOfSquares);
+        void CrossAlongEdge(int numOfSquares);
+        void CrossStraight(int numOfSquares, bool measureSquareDistance);
 
-    void Center(int firstEdge, int secondEdge);
-    void SmartCenter();
-    void AlignToEdge(float targetSpeed = 0.4);
-    void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
+        void Center(int firstEdge, int secondEdge);
+        void SmartCenter();
+        void AlignToEdge(float targetSpeed = 0.4);
+        void MoveDistance(long numOfEncoderTicks, float targetSpeed = 0.4);
 
-    XBee xbee;
-    XBeeAddress64 coordinatorAddr64;
-    ZBRxResponse rx;
+        XBee xbee;
+        XBeeAddress64 coordinatorAddr64;
+        ZBRxResponse rx;
 
-    LeftWheel leftWheel;
-    RightWheel rightWheel;
+        LeftWheel leftWheel;
+        RightWheel rightWheel;
 
-    Gyroscope gyro;
+        Gyroscope gyro;
 
-    Locator locator;
+        Locator locator;
 
-    BRPhotodiode backRightPhotoDiode;
-    BLPhotodiode backLeftPhotoDiode;
-    FRPhotodiode frontRightPhotoDiode;
-    FLPhotodiode frontLeftPhotoDiode;
+        BRPhotodiode backRightPhotoDiode;
+        BLPhotodiode backLeftPhotoDiode;
+        FRPhotodiode frontRightPhotoDiode;
+        FLPhotodiode frontLeftPhotoDiode;
 
-    double angleState;
+        double angleState;
 
-private:
-    long squareDistance;
+    private:
+        long squareDistance;
 
 };
 

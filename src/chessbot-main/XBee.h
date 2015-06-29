@@ -1,10 +1,10 @@
 #ifndef XBEE_H
-#define XBEE_H 
+#define XBEE_H
 #endif
 
 /*
- Documentation: https://code.google.com/p/xbee-arduino/
- Class Hierarchy: http://xbee-arduino.googlecode.com/svn/trunk/docs/api/index.html
+Documentation: https://code.google.com/p/xbee-arduino/
+Class Hierarchy: http://xbee-arduino.googlecode.com/svn/trunk/docs/api/index.html
 */
 
 #include "XBeeResponse.h"
@@ -112,17 +112,17 @@
  * This class provides methods for sending and receiving packets with an XBee radio via the serial port.
  * The XBee radio must be configured in API (packet) mode (AP=2)
  * in order to use this software.
- * 
+ *
  * Since this code is designed to run on a microcontroller, with only one thread, you are responsible for reading the
  * data off the serial buffer in a timely manner.  This involves a call to a variant of readPacket(...).
  * If your serial port is receiving data faster than you are reading, you can expect to lose packets.
  * Arduino only has a 128 byte serial buffer so it can easily overflow if two or more packets arrive
  * without a call to readPacket(...)
- * 
+ *
  * In order to conserve resources, this class only supports storing one response packet in memory at a time.
  * This means that you must fully consume the packet prior to calling readPacket(...), because calling
  * readPacket(...) overwrites the previous response.
- * 
+ *
  * This class creates an array of size MAX_FRAME_DATA_SIZE for storing the response packet.  You may want
  * to adjust this value to conserve memory.
  *
@@ -130,70 +130,70 @@
  */
 class XBee
 {
-public:
-	XBee();
-	void setSerial(Stream &serial);
+    public:
+        XBee();
+        void setSerial(Stream &serial);
 
-	/**
-	 * Reads all available serial bytes until a packet is parsed, an error occurs, or the buffer is empty.
-	 * You may call xbee.getResponse().isAvailable() after calling this method to determine if
-	 * a packet is ready, or xbee.getResponse().isError() to determine if
-	 * a error occurred.
-	 * 
-	 * This method should always return quickly since it does not wait for serial data to arrive.
-	 * You will want to use this method if you are doing other timely stuff in your loop, where
-	 * a delay would cause problems.
-	 * NOTE: calling this method resets the current response, so make sure you first consume the
-	 * current response
-	 */
-	void readPacket();
+        /**
+         * Reads all available serial bytes until a packet is parsed, an error occurs, or the buffer is empty.
+         * You may call xbee.getResponse().isAvailable() after calling this method to determine if
+         * a packet is ready, or xbee.getResponse().isError() to determine if
+         * a error occurred.
+         *
+         * This method should always return quickly since it does not wait for serial data to arrive.
+         * You will want to use this method if you are doing other timely stuff in your loop, where
+         * a delay would cause problems.
+         * NOTE: calling this method resets the current response, so make sure you first consume the
+         * current response
+         */
+        void readPacket();
 
-	/**
-	 * Waits a maximum of timeout milliseconds for a response packet before timing out; returns true if packet is read.
-	 * Returns false if timeout or error occurs.
-	 */
-	bool readPacket(int timeout);
+        /**
+         * Waits a maximum of timeout milliseconds for a response packet before timing out; returns true if packet is read.
+         * Returns false if timeout or error occurs.
+         */
+        bool readPacket(int timeout);
 
-	/**
-	 * Reads until a packet is received or an error occurs.
-	 * Caution: use this carefully since if you don't get a response, your Arduino code will hang on this
-	 * call forever!! often it's better to use a timeout: readPacket(int)
-	 */
-	void readPacketUntilAvailable();
+        /**
+         * Reads until a packet is received or an error occurs.
+         * Caution: use this carefully since if you don't get a response, your Arduino code will hang on this
+         * call forever!! often it's better to use a timeout: readPacket(int)
+         */
+        void readPacketUntilAvailable();
 
-	void getResponse(XBeeResponse &response);
-    
-	/**
-	 * Returns a reference to the current response
-	 * Note: once readPacket is called again this response will be overwritten!
-	 */
-	XBeeResponse& getResponse();
+        void getResponse(XBeeResponse &response);
 
-	/**
-	 * Sends a XBeeRequest (TX packet) out the serial port
-	 */
-	void send(XBeeRequest &request);
+        /**
+         * Returns a reference to the current response
+         * Note: once readPacket is called again this response will be overwritten!
+         */
+        XBeeResponse& getResponse();
 
-	/**
-	 * Returns a sequential frame id between 1 and 255
-	 */
-	uint8_t getNextFrameId();
-    
-private:
-	bool available();
-	uint8_t read();
-	void flush();
-	void write(uint8_t val);
-	void sendByte(uint8_t messageByte, bool escape);
-	void resetResponse();
+        /**
+         * Sends a XBeeRequest (TX packet) out the serial port
+         */
+        void send(XBeeRequest &request);
 
-	XBeeResponse _response;
-	bool _escape;
-	uint8_t _pos; //current packet position for response.
-	uint8_t lastByteRead;
-	uint8_t _checksumTotal;
-	uint8_t _nextFrameId;
-	uint8_t _responseFrameData[MAX_FRAME_DATA_SIZE]; //buffer for incoming RX packets.  holds only the api specific frame data, starting after the api id byte and prior to checksum
+        /**
+         * Returns a sequential frame id between 1 and 255
+         */
+        uint8_t getNextFrameId();
 
-	Stream* _serial;
+    private:
+        bool available();
+        uint8_t read();
+        void flush();
+        void write(uint8_t val);
+        void sendByte(uint8_t messageByte, bool escape);
+        void resetResponse();
+
+        XBeeResponse _response;
+        bool _escape;
+        uint8_t _pos; //current packet position for response.
+        uint8_t lastByteRead;
+        uint8_t _checksumTotal;
+        uint8_t _nextFrameId;
+        uint8_t _responseFrameData[MAX_FRAME_DATA_SIZE]; //buffer for incoming RX packets.  holds only the api specific frame data, starting after the api id byte and prior to checksum
+
+        Stream* _serial;
 };

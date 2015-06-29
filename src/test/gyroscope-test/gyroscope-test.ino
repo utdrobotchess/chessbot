@@ -6,23 +6,23 @@ float Angles[3];
 
 void setup()
 {
-  Serial.begin(9600);
-  gyro.Init();
+    Serial.begin(9600);
+    gyro.Init();
 }
 
 void loop()
 {
-  angleEstimationTest();
+    angleEstimationTest();
 }
 
 void angleEstimationTest()
 {
-  delay(10);
-  gyro.UpdateAngles();
-  Serial.print(gyro.ReturnXAngle());
-  Serial.print(" ");
-  Serial.print(gyro.ReturnYAngle());
-  Serial.print(" ");
-  Serial.print(gyro.ReturnZAngle());
-  Serial.println(".");
+    delay(10);
+    gyro.UpdateAngles();
+    Serial.print(gyro.ReturnXAngle());
+    Serial.print(" ");
+    Serial.print(gyro.ReturnYAngle());
+    Serial.print(" ");
+    Serial.print(gyro.ReturnZAngle());
+    Serial.println(".");
 }
