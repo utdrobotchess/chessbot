@@ -1,3 +1,5 @@
 *.aux
 *.log
 doc/manual.pdf
+src/test/*/*.h
+src/test/*/*.cpp
